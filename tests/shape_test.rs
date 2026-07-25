@@ -1,5 +1,5 @@
 
-use pulsars::shape::shape::Shape;
+use pulsars::shape::Shape;
 
 #[test]
 fn test_shape_rank() {

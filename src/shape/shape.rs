@@ -5,11 +5,7 @@
 */
 
 use std::fmt::Display;
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Shape {
-    dims: Vec<usize>,
-}
+use super::Shape;
 
 impl Shape {
     
@@ -51,6 +47,20 @@ impl Shape {
 
     pub fn iter(&self) -> std::slice::Iter<'_, usize> {
         self.dims.iter()
+    }
+
+    pub fn validate_index(&self, index: &[usize]) -> bool {
+        if self.rank() != index.len() {
+            return false;
+        }
+
+        for i in 0..self.rank() {
+            if index[i] >= self.dims[i] {
+                return false;
+            }
+        }
+        
+        true
     }
 }
 

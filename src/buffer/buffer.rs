@@ -4,11 +4,8 @@
     It is a contiguous 1-D vector of data and is not committed to a shape.
 */
 
-use std::ops::Index;
-
-pub struct Buffer<T>{
-    data: Vec<T>,
-}
+use std::ops::{Index};
+use super::Buffer;
 
 impl<T> Buffer<T>{
     

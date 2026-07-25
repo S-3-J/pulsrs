@@ -1,7 +1,7 @@
 
-use pulsars::shape::shape::Shape;
-use pulsars::stride::stride::Stride;
-use pulsars::error::error::PulsrsError;
+use pulsars::shape::Shape;
+use pulsars::stride::Stride;
+use pulsars::error::PulsrsError;
 
 #[test]
 fn test_stride_construction_from_shape() {

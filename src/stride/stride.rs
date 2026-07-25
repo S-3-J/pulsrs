@@ -5,13 +5,9 @@
     in a vast buffer.
 */
 
-use crate::error::error::PulsrsError;
-use crate::shape::shape::Shape;
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Stride {
-    strides : Vec<usize>,
-}
+use crate::error::PulsrsError;
+use crate::shape::Shape;
+use super::Stride;
 
 impl Stride {
     pub fn from_shape(shape : &Shape) -> Self {
