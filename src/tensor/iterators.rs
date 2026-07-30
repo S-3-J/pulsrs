@@ -22,15 +22,10 @@ impl<T> Tensor<T> {
     pub fn tensor_iterator<'a>(&'a self, style: IterStyle) -> TensorIterator<'a, T>
     where
         T: 'a
-    {
-        let priority: Vec<usize> = style.process(self.ndim());
-        
+    {   
         TensorIterator::new(
             self,
-            IndexCursor::new(
-                self.shape().dims().to_vec(),
-                priority,
-            )
+            style,
         )
     }
 }

@@ -1,3 +1,5 @@
+use std::{collections::HashSet};
+
 
 pub enum IterStyle{
     Cstyle,
@@ -26,6 +28,26 @@ impl IterStyle {
             },
 
             Self::Custom(v) => {
+
+                if v.len() != dims {
+                    panic!("Invalid custom priorities given for iteration style, not all axis present.")
+                }
+
+                let valid = v.iter()
+                    .all(|a| a < &dims);
+
+                if !valid {
+                    panic!("Invalid custom priorities given for iteration style, dimensions exceed rank.")
+                }
+
+                let mut member: HashSet<usize> = HashSet::new();
+
+                let unique = v.iter()
+                    .all(|&a| member.insert(a));
+                
+                if !unique {
+                    panic!("Invalid custom priorities given for iteration style, contains duplicate.")
+                }
                 v
             }
         }

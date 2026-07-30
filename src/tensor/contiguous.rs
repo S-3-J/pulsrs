@@ -24,15 +24,9 @@ where
             where
                 T: Copy + Default
             {
-                if depth < dims.len() - 1 {
-                    n_dim_iterator(t, dims,depth+1, index, new_buffer, new_stride);
-                }
-
                 for i in 0..dims[depth] {
-
+                    index[depth] = i;
                     if depth+1 == dims.len() {
-                        index[depth] = i;
-                        
                         // should panic and crash if erroneous; 
                         //however its not possible to crash here as the tensor won't index out of bounds.
                         let val = t.get(index).unwrap();
@@ -40,7 +34,6 @@ where
                         
                         new_buffer[new_offset] = val;   
                     } else {
-                        index[depth] = i;
                         n_dim_iterator(t, dims, depth+1, index, new_buffer, new_stride);    
                     }
 

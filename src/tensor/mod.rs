@@ -10,6 +10,11 @@ pub mod reshape;
 pub mod permutation;
 pub mod indexing;
 pub mod iterators;
+pub mod display;
+pub mod mappings;
+pub mod unary_operations;
+pub mod binary_operations;
+pub mod reduce_operations;
 
 #[derive(Clone, Debug)]
 pub struct Tensor<T>

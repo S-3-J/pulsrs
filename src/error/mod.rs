@@ -32,5 +32,5 @@ pub enum PulsrsError{
         max: usize,
         min: usize,
         found: usize,
-    }
+    },
 }

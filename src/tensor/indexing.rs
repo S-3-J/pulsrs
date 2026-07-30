@@ -39,6 +39,30 @@ where
         
         }
     }
+
+    pub(crate) fn get_from_offset(&self, offset: usize) -> Result<T, PulsrsError> {
+        if self.is_scalar() {
+
+            if offset != 0 {
+                return Err(
+                    PulsrsError::TensorIndexingError { shape: self.shape().clone(), indices: vec![offset] }
+                );
+            }
+
+            Ok(self.buffer[0])
+        
+        } else {
+            
+            if offset >= self.buffer.len() {
+                return Err(PulsrsError::TensorIndexingError { shape: self.shape().clone(), indices: vec![offset] });
+            } else {
+                Ok(
+                    self.buffer[offset]
+                )
+            }
+        
+        }
+    }
 }
 
 impl<T> Index<&[usize]> for Tensor<T>
