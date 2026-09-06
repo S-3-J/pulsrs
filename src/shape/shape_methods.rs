@@ -1,16 +1,21 @@
-
 /*
     Shape class helps to hold shape of a buffer,
     effectively decoupling buffer and its crystallization.
 */
 
-use std::fmt::Display;
 use super::Shape;
+use std::fmt::Display;
 
 impl Shape {
-    
     pub fn new(dims: Vec<usize>) -> Self {
-        Self { dims }
+        Self { dims, names: None }
+    }
+
+    pub fn with_names(dims: Vec<usize>, names: Vec<String>) -> Self {
+        Self {
+            dims,
+            names: Some(names),
+        }
     }
 
     pub fn scalar() -> Self {
@@ -49,21 +54,31 @@ impl Shape {
         self.dims.iter()
     }
 
+    pub fn has_names(&self) -> bool {
+        self.names.is_some()
+    }
+
+    pub fn iter_with_names(&self) -> Option<impl Iterator<Item = (&usize, &String)>> {
+        self.names
+            .as_ref()
+            .map(|names| self.dims.iter().zip(names.iter()))
+    }
+
     pub fn validate_index(&self, index: &[usize]) -> bool {
         if self.rank() != index.len() {
             return false;
         }
 
-        for i in 0..self.rank() {
-            if index[i] >= self.dims[i] {
+        for (i, j) in index.iter().zip(self.dims.iter()) 
+        {
+            if *i >= *j {
                 return false;
             }
         }
-        
+
         true
     }
 }
-
 
 impl Default for Shape {
     fn default() -> Self {
@@ -78,18 +93,23 @@ impl From<Vec<usize>> for Shape {
 }
 
 impl Display for Shape {
-    fn fmt(
-        &self, 
-        f: &mut std::fmt::Formatter<'_>
-    ) -> std::fmt::Result {
-        
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // stringify, collect and join dimensions
-        let dims: String = self.iter().map(|n| n.to_string()).collect::<Vec<String>>().join(", ");
+        let final_dims = {
+            if let Some(named_dims) = self.iter_with_names() {
+                named_dims
+                    .map(|(dim, name)| format!("{}: {}", name, dim))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            } else {
+                self.iter()
+                    .map(|n| n.to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            }
+        };
 
-        write!(
-            f,
-            "({},)",
-            dims
-        )
+        write!(f, "({},)", final_dims)?;
+        Ok(())
     }
 }

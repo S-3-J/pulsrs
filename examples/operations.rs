@@ -1,16 +1,35 @@
+use std::time::Instant;
 
 use pulsars::tensor::*;
 
 fn main() {
-    let t1 = Tensor::from_vector((1..=24).collect::<Vec<i32>>(), vec![2, 3, 4]).unwrap();
+    let t1 = Tensor::from_vector(
+        (1..=1000000).map(|x| x as f32).collect::<Vec<f32>>(),
+        vec![10, 100, 1000],
+    )
+    .unwrap();
+    let t2 = t1.permute(vec![2, 0, 1]).unwrap();
 
-    let t2 = t1.reduce_sum(&[1]);
-    let t3 = t1.reduce_max(&[1]);
-    let t4 = (&t1).reduce_mean(&[1]);
+    let start = Instant::now();
 
+    for _ in 0..100 {
+        let _ = t1.try_add(&t1).unwrap();
+    }
 
-    print!("{}\n", t1);
-    print!("{}\n", t2);
-    print!("{}\n", t3);
-    print!("{}\n", t4);
+    let time_t3 = start.elapsed();
+
+    print!("Time for contiguous: {:?}\n", time_t3);
+    print!("Amortized Time for contiguous: {:?}\n", time_t3 / 1000);
+
+    for _ in 0..100 {
+        let _ = t2.try_add(&t2).unwrap();
+    }
+
+    let time_t4 = start.elapsed();
+    print!("Time for non contiguous: {:?}\n", time_t4 - time_t3);
+    print!(
+        "Amortized Time for contiguous: {:?}\n",
+        (time_t4 - time_t3) / 1000
+    );
+    print!("Total: {:?}\n", time_t4)
 }

@@ -18,11 +18,8 @@ impl IndexCursor {
     }
 
     pub fn contiguous_style(&self) -> bool {
-        let prs = self.priority.windows(2)
-            .map(|w| w[0] > w[1])
-            .fold(true, |acc, e| acc && e);
-        
-        prs
+        self.priority.windows(2)
+            .all(|w| w[0] > w[1])
     }
 }
 
@@ -31,7 +28,7 @@ impl Cursor for IndexCursor {
 
     fn advance(&mut self) {
 
-        if self.dims.len() == 0 {
+        if self.dims.is_empty() {
             self.overflow = true;
         } else {
             self.overflow = true;

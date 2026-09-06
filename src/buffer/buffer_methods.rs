@@ -4,7 +4,7 @@
     It is a contiguous 1-D vector of data and is not committed to a shape.
 */
 
-use std::ops::{Index};
+use std::ops::{Index, IndexMut};
 use super::Buffer;
 
 impl<T> Buffer<T>{
@@ -59,5 +59,17 @@ impl<T> Index<usize> for Buffer<T> {
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.data[index]
+    }
+}
+
+impl<T> IndexMut<usize> for Buffer<T> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.data[index]
+    }
+}
+
+impl<T> Default for Buffer<T> {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -1,6 +1,4 @@
 use std::{collections::HashSet};
-
-
 pub enum IterStyle{
     Cstyle,
     Fstyle,

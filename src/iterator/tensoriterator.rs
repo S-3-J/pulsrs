@@ -1,6 +1,7 @@
 
 use std::{fmt::Debug};
 use crate::cursor::OffsetCursor;
+use crate::dtype::Element;
 use crate::iterator::iterator_backend::IteratorBackend;
 use crate::{cursor::{Cursor}, tensor::Tensor};
 use crate::iterator::iteration_style::IterStyle;
@@ -9,7 +10,7 @@ use super::TensorIterator;
 
 impl<'a, T> TensorIterator<'a, T>
 where
-    T: 'a
+    T: 'a + Element
 {
     pub fn new(tensor: &'a Tensor<T>, priority: IterStyle) -> Self 
     {
@@ -20,7 +21,7 @@ where
             // defaults to strided offset
             false => {
                 IteratorBackend::StridedOffset {
-                    offsetter: OffsetCursor::new(tensor.shape().dims(), tensor.strides(), priority.process(tensor.ndim()))
+                    offsetter: OffsetCursor::new(tensor.shape().dims(), tensor.strides(), priority.process(tensor.ndim()), tensor.offset() as isize)
                 }
             }
         };
@@ -39,7 +40,7 @@ where
 
 impl<'a, T> Iterator for TensorIterator<'a, T>
 where
-    T: 'a + Copy + Debug
+    T: 'a + Copy + Debug + Element
 {
     type Item = T;
     

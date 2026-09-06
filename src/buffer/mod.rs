@@ -1,5 +1,5 @@
 
-pub mod buffer;
+pub mod buffer_methods;
 
 #[derive(Debug)]
 pub struct Buffer<T>{

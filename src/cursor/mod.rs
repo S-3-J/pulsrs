@@ -27,10 +27,10 @@ pub struct IndexCursor {
 
 pub struct OffsetCursor<'a> {
     dims: &'a [usize],
-    strides: &'a [usize],
+    strides: &'a [isize],
     priority: Vec<usize>,
     current_index: Vec<usize>,
-    offset: usize,
+    offset: isize,
     overflow: bool,
     filled: bool,
 }

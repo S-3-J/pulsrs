@@ -1,12 +1,12 @@
 
 use std::fmt::{Display, Write};
-use std::any::type_name;
 
+use crate::dtype::Element;
 use crate::tensor::Tensor;
 
 impl<T> Display for Tensor<T> 
 where 
-    T: Copy + Display
+    T: Copy + Display + Element
 {
     
     fn fmt(
@@ -16,7 +16,7 @@ where
     {
         fn recursive_printer<T>(t: &Tensor<T>, depth: usize, index: &mut Vec<usize>, dims: &[usize]) -> String
         where 
-            T: Copy + Display
+            T: Copy + Display + Element
         {
             if depth >= dims.len() {
                 return "".to_string();
@@ -64,8 +64,9 @@ where
                 f,
                 "[{}], dtype: {}",
                 self.get_from_offset(0).unwrap(),
-                type_name::<T>()
-            )
+                self.dtype().name()
+            )?;
+            Ok(())
         } else {
             let mut index = vec![0usize; self.ndim()];
             let dims = self.shape().dims();
@@ -75,9 +76,10 @@ where
                 f,
                 "{}, dtype: {}, shape: {}",
                 t,
-                type_name::<T>(),
+                self.dtype().name(),
                 self.shape().clone()
-            )
+            )?;
+            Ok(())
         }
 
     }

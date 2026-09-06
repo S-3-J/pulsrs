@@ -2,7 +2,7 @@
 use std::{
     ops::{Add, Div, Mul, Rem, Sub}
 };
-use crate::tensor::Tensor;
+use crate::{tensor::Tensor};
 
 macro_rules! impl_scalar_operations {
     ($($t:ty),*) => {

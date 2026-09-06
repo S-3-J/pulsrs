@@ -1,11 +1,5 @@
 #[allow(unused_imports)]
-use pulsars::{
-    buffer::Buffer,
-    shape::Shape,
-    stride::Stride,
-    tensor::Tensor,
-    error::PulsrsError
-};
+use pulsars::{buffer::Buffer, error::PulsrsError, shape::Shape, stride::Stride, tensor::Tensor};
 
 // =============================================================================
 // SCALAR TENSOR TESTS
@@ -53,7 +47,8 @@ fn test_scalar_is_always_contiguous() {
 
 #[test]
 fn test_tensor_creation_from_vector() {
-    let x: Tensor<f32> = Tensor::from_vector(vec![2.6f32, 3.4, 5.6, 5.7, 4.6, 33.5], vec![6]).unwrap();
+    let x: Tensor<f32> =
+        Tensor::from_vector(vec![2.6f32, 3.4, 5.6, 5.7, 4.6, 33.5], vec![6]).unwrap();
 
     assert!(!x.is_scalar());
     assert_eq!(x.shape().dims(), &[6]);
@@ -103,7 +98,10 @@ fn test_vector_from_wrong_element_count() {
     let result = Tensor::<i32>::from_vector(vec![1, 2, 3], vec![5]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::ShapeIncompatiblewithElements { expected, permitted } => {
+        PulsrsError::ShapeIncompatiblewithElements {
+            expected,
+            permitted,
+        } => {
             assert_eq!(expected, 3);
             assert_eq!(permitted, 5);
         }
@@ -117,10 +115,8 @@ fn test_vector_from_wrong_element_count() {
 
 #[test]
 fn test_2d_tensor_get() {
-    let x: Tensor<f32> = Tensor::from_vector(
-        vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<f32> =
+        Tensor::from_vector(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], vec![2, 3]).unwrap();
 
     assert_eq!(x.get(&[0, 0]).unwrap(), 1.0);
     assert_eq!(x.get(&[0, 1]).unwrap(), 2.0);
@@ -132,10 +128,7 @@ fn test_2d_tensor_get() {
 
 #[test]
 fn test_2d_tensor_get_out_of_bounds() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     assert!(x.get(&[2, 0]).is_err());
     assert!(x.get(&[0, 2]).is_err());
@@ -144,20 +137,14 @@ fn test_2d_tensor_get_out_of_bounds() {
 
 #[test]
 fn test_2d_tensor_strides() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     assert_eq!(x.strides(), &[2, 1]);
 }
 
 #[test]
 fn test_2d_tensor_numel() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     assert_eq!(x.numel(), 6);
 }
@@ -168,10 +155,7 @@ fn test_2d_tensor_numel() {
 
 #[test]
 fn test_3d_tensor_get() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6, 7, 8],
-        vec![2, 2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![2, 2, 2]).unwrap();
 
     assert_eq!(x.get(&[0, 0, 0]).unwrap(), 1);
     assert_eq!(x.get(&[0, 0, 1]).unwrap(), 2);
@@ -185,20 +169,14 @@ fn test_3d_tensor_get() {
 
 #[test]
 fn test_3d_tensor_strides() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 1, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 1, 3]).unwrap();
 
     assert_eq!(x.strides(), &[3, 3, 1]);
 }
 
 #[test]
 fn test_4d_tensor_basic() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        (0..24).collect(),
-        vec![2, 2, 2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector((0..24).collect(), vec![2, 2, 2, 3]).unwrap();
 
     assert_eq!(x.rank(), 4);
     assert_eq!(x.numel(), 24);
@@ -219,10 +197,7 @@ fn test_singleton_dimension_1d() {
 
 #[test]
 fn test_singleton_dimension_2d() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3],
-        vec![1, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3], vec![1, 3]).unwrap();
 
     assert_eq!(x.numel(), 3);
     assert_eq!(x.get(&[0, 0]).unwrap(), 1);
@@ -231,10 +206,7 @@ fn test_singleton_dimension_2d() {
 
 #[test]
 fn test_trailing_singleton_dimension() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2],
-        vec![2, 1]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2], vec![2, 1]).unwrap();
 
     assert_eq!(x.numel(), 2);
     assert_eq!(x.get(&[0, 0]).unwrap(), 1);
@@ -273,8 +245,9 @@ fn test_zero_in_shape() {
 
 #[test]
 fn test_tensor_contiguous() {
-    let x: Tensor<f32> = Tensor::from_vector(vec![2.6f32, 3.4, 5.6, 5.7, 4.6, 33.5], vec![6]).unwrap();
-    let r_x = x.reshape(vec![2,3]).unwrap();
+    let x: Tensor<f32> =
+        Tensor::from_vector(vec![2.6f32, 3.4, 5.6, 5.7, 4.6, 33.5], vec![6]).unwrap();
+    let r_x = x.reshape(vec![2, 3]).unwrap();
     let r_x_transpose = r_x.permute(vec![1, 0]).unwrap();
 
     assert!(x.is_contiguous());
@@ -284,10 +257,7 @@ fn test_tensor_contiguous() {
 
 #[test]
 fn test_identity_permutation_is_contiguous() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let identity = x.permute(vec![0, 1]).unwrap();
     assert!(identity.is_contiguous());
@@ -295,10 +265,7 @@ fn test_identity_permutation_is_contiguous() {
 
 #[test]
 fn test_transpose_2d_is_not_contiguous() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let transposed = x.permute(vec![1, 0]).unwrap();
     assert!(!transposed.is_contiguous());
@@ -316,10 +283,7 @@ fn test_scalar_always_contiguous() {
 
 #[test]
 fn test_reshape_basic() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let reshaped = x.reshape(vec![3, 2]).unwrap();
     assert_eq!(reshaped.shape().dims(), &[3, 2]);
@@ -329,10 +293,7 @@ fn test_reshape_basic() {
 
 #[test]
 fn test_reshape_to_1d() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let flat = x.reshape(vec![4]).unwrap();
     assert_eq!(flat.shape().dims(), &[4]);
@@ -342,10 +303,7 @@ fn test_reshape_to_1d() {
 
 #[test]
 fn test_reshape_with_singleton() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let reshaped = x.reshape(vec![1, 4]).unwrap();
     assert_eq!(reshaped.shape().dims(), &[1, 4]);
@@ -354,10 +312,7 @@ fn test_reshape_with_singleton() {
 
 #[test]
 fn test_reshape_preserves_numel() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        (0..24).collect(),
-        vec![2, 3, 4]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector((0..24).collect(), vec![2, 3, 4]).unwrap();
 
     let reshaped = x.reshape(vec![4, 6]).unwrap();
     assert_eq!(reshaped.numel(), 24);
@@ -365,10 +320,7 @@ fn test_reshape_preserves_numel() {
 
 #[test]
 fn test_reshape_wrong_element_count() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let result = x.reshape(vec![3, 3]);
     assert!(result.is_err());
@@ -395,10 +347,7 @@ fn test_reshape_to_scalar() {
 
 #[test]
 fn test_permute_2d_transpose() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let transposed = x.permute(vec![1, 0]).unwrap();
     assert_eq!(transposed.get(&[0, 0]).unwrap(), 1);
@@ -409,10 +358,7 @@ fn test_permute_2d_transpose() {
 
 #[test]
 fn test_permute_3d() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![1, 2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![1, 2, 3]).unwrap();
 
     let perm = x.permute(vec![2, 0, 1]).unwrap();
     assert_eq!(perm.shape().dims(), &[3, 1, 2]);
@@ -421,10 +367,7 @@ fn test_permute_3d() {
 
 #[test]
 fn test_permute_axis_out_of_bounds() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let result = x.permute(vec![0, 2]);
     assert!(result.is_err());
@@ -439,10 +382,7 @@ fn test_permute_axis_out_of_bounds() {
 
 #[test]
 fn test_permute_duplicate_axis() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let result = x.permute(vec![0, 0]);
     assert!(result.is_err());
@@ -456,10 +396,7 @@ fn test_permute_duplicate_axis() {
 
 #[test]
 fn test_permute_wrong_length() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let result = x.permute(vec![0]);
     assert!(result.is_err());
@@ -500,10 +437,7 @@ fn test_permute_scalar_accepts_empty() {
 
 #[test]
 fn test_flatten_2d() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let flat = x.flatten().unwrap();
     assert_eq!(flat.shape().dims(), &[6]);
@@ -513,10 +447,7 @@ fn test_flatten_2d() {
 
 #[test]
 fn test_flatten_3d() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        (0..24).collect(),
-        vec![2, 3, 4]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector((0..24).collect(), vec![2, 3, 4]).unwrap();
 
     let flat = x.flatten().unwrap();
     assert_eq!(flat.shape().dims(), &[24]);
@@ -526,10 +457,7 @@ fn test_flatten_3d() {
 
 #[test]
 fn test_flatten_already_1d() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3],
-        vec![3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3], vec![3]).unwrap();
 
     let flat = x.flatten().unwrap();
     assert_eq!(flat.shape().dims(), &[3]);
@@ -549,10 +477,7 @@ fn test_flatten_scalar() {
 
 #[test]
 fn test_contiguous_preserves_data_2d() {
-    let original: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let original: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let transposed = original.permute(vec![1, 0]).unwrap();
     let made_contiguous = transposed.contiguous();
@@ -568,10 +493,7 @@ fn test_contiguous_preserves_data_2d() {
 
 #[test]
 fn test_contiguous_does_not_modify_original() {
-    let original: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let original: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let transposed = original.permute(vec![1, 0]).unwrap();
     let _contiguous = transposed.contiguous();
@@ -581,10 +503,7 @@ fn test_contiguous_does_not_modify_original() {
 
 #[test]
 fn test_contiguous_already_contiguous_returns_clone() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let result = x.contiguous();
     assert!(result.is_contiguous());
@@ -592,10 +511,7 @@ fn test_contiguous_already_contiguous_returns_clone() {
 
 #[test]
 fn test_contiguous_preserves_numel() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        (0..120).collect(),
-        vec![2, 3, 4, 5]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector((0..120).collect(), vec![2, 3, 4, 5]).unwrap();
 
     let transposed = x.permute(vec![3, 2, 1, 0]).unwrap();
     let made_contiguous = transposed.contiguous();
@@ -617,10 +533,7 @@ fn test_contiguous_scalar() {
 
 #[test]
 fn test_reshape_permute_get_chain() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6, 7, 8],
-        vec![2, 2, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![2, 2, 2]).unwrap();
 
     let reshaped = x.reshape(vec![4, 2]).unwrap();
     let permuted = reshaped.permute(vec![1, 0]).unwrap();
@@ -634,10 +547,7 @@ fn test_reshape_permute_get_chain() {
 
 #[test]
 fn test_flatten_reshape_get_chain() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let flat = x.flatten().unwrap();
     let reshaped = flat.reshape(vec![3, 2]).unwrap();
@@ -648,10 +558,7 @@ fn test_flatten_reshape_get_chain() {
 
 #[test]
 fn test_multiple_permutes() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        (0..24).collect(),
-        vec![2, 3, 4]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector((0..24).collect(), vec![2, 3, 4]).unwrap();
 
     let p1 = x.permute(vec![2, 1, 0]).unwrap();
     let p2 = p1.permute(vec![2, 1, 0]).unwrap();
@@ -662,10 +569,7 @@ fn test_multiple_permutes() {
 
 #[test]
 fn test_permute_contiguous_reshape() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let transposed = x.permute(vec![1, 0]).unwrap();
     let c = transposed.contiguous();
@@ -681,10 +585,7 @@ fn test_permute_contiguous_reshape() {
 
 #[test]
 fn test_shape_stride_rank_consistency_after_creation() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     assert_eq!(x.rank(), x.shape().rank());
     assert_eq!(x.rank(), x.strides().len());
@@ -693,10 +594,7 @@ fn test_shape_stride_rank_consistency_after_creation() {
 
 #[test]
 fn test_shape_stride_rank_consistency_after_reshape() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let r = x.reshape(vec![3, 2]).unwrap();
     assert_eq!(r.rank(), r.shape().rank());
@@ -705,10 +603,7 @@ fn test_shape_stride_rank_consistency_after_reshape() {
 
 #[test]
 fn test_shape_stride_rank_consistency_after_permute() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let p = x.permute(vec![1, 0]).unwrap();
     assert_eq!(p.rank(), p.shape().rank());
@@ -717,10 +612,7 @@ fn test_shape_stride_rank_consistency_after_permute() {
 
 #[test]
 fn test_contiguous_flag_matches_actual_layout() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     assert!(x.is_contiguous());
 
@@ -733,10 +625,7 @@ fn test_contiguous_flag_matches_actual_layout() {
 
 #[test]
 fn test_reshaped_tensor_preserves_numel() {
-    let original: Tensor<i32> = Tensor::from_vector(
-        (0..60).collect(),
-        vec![3, 4, 5]
-    ).unwrap();
+    let original: Tensor<i32> = Tensor::from_vector((0..60).collect(), vec![3, 4, 5]).unwrap();
 
     let reshaped = original.reshape(vec![4, 3, 5]).unwrap();
     assert_eq!(reshaped.numel(), original.numel());
@@ -745,10 +634,7 @@ fn test_reshaped_tensor_preserves_numel() {
 
 #[test]
 fn test_permuted_tensor_preserves_numel() {
-    let original: Tensor<i32> = Tensor::from_vector(
-        (0..24).collect(),
-        vec![2, 3, 4]
-    ).unwrap();
+    let original: Tensor<i32> = Tensor::from_vector((0..24).collect(), vec![2, 3, 4]).unwrap();
 
     let permuted = original.permute(vec![2, 0, 1]).unwrap();
     assert_eq!(permuted.numel(), original.numel());
@@ -756,17 +642,14 @@ fn test_permuted_tensor_preserves_numel() {
 
 #[test]
 fn test_strides_consistent_with_shape() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let shape = x.shape().dims();
     let strides = x.strides();
 
     for i in 0..strides.len() {
-        let expected_stride: usize = shape[i+1..].iter().product();
-        assert_eq!(strides[i], expected_stride);
+        let expected_stride: usize = shape[i + 1..].iter().product();
+        assert_eq!(strides[i], expected_stride as isize);
     }
 }
 
@@ -823,10 +706,7 @@ fn test_large_tensor_contiguous() {
 
 #[test]
 fn test_permute_shares_buffer() {
-    let original: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let original: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let permuted = original.permute(vec![1, 0]).unwrap();
 
@@ -840,10 +720,7 @@ fn test_permute_shares_buffer() {
 
 #[test]
 fn test_high_rank_tensor_7d() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2],
-        vec![1, 1, 1, 1, 1, 1, 2]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2], vec![1, 1, 1, 1, 1, 1, 2]).unwrap();
 
     assert_eq!(x.rank(), 7);
     assert_eq!(x.numel(), 2);
@@ -851,20 +728,14 @@ fn test_high_rank_tensor_7d() {
 
 #[test]
 fn test_vector_stride_calculation() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![6]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![6]).unwrap();
 
     assert_eq!(x.strides(), &[1]);
 }
 
 #[test]
 fn test_strides_with_zeros_in_shape() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![],
-        vec![0, 5]
-    ).unwrap();
+    let x: Tensor<i32> = Tensor::from_vector(vec![], vec![0, 5]).unwrap();
 
     assert_eq!(x.numel(), 0);
     assert_eq!(x.strides(), &[5, 1]);
@@ -872,10 +743,8 @@ fn test_strides_with_zeros_in_shape() {
 
 #[test]
 fn test_all_ones_shape() {
-    let x: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6, 7, 8],
-        vec![1, 1, 1, 1, 1, 1, 1, 8]
-    ).unwrap();
+    let x: Tensor<i32> =
+        Tensor::from_vector(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![1, 1, 1, 1, 1, 1, 1, 8]).unwrap();
 
     assert_eq!(x.numel(), 8);
     assert_eq!(x.get(&[0, 0, 0, 0, 0, 0, 0, 7]).unwrap(), 8);

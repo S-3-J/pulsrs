@@ -1,25 +1,16 @@
-
-use super::{
-    OffsetCursor,
-    Cursor
-};
+use super::{Cursor, OffsetCursor};
 
 // special fast cursor just for contiguous tensors
 impl<'a> OffsetCursor<'a> {
-    pub fn new(
-        dims: &'a [usize], 
-        strides: &'a [usize],
-        priority: Vec<usize>,
-    ) -> Self {
-
-        let filled = dims.iter().product::<usize>() != 0usize ;
+    pub fn new(dims: &'a [usize], strides: &'a [isize], priority: Vec<usize>, offset: isize) -> Self {
+        let filled = dims.iter().product::<usize>() != 0usize;
 
         Self {
             dims,
             strides,
             priority,
             current_index: vec![0usize; dims.len()],
-            offset: 0,
+            offset,
             overflow: false,
             filled,
         }
@@ -31,7 +22,7 @@ impl<'a> Cursor for OffsetCursor<'a> {
 
     #[inline(always)]
     fn advance(&mut self) {
-        if self.dims.len() == 0 {
+        if self.dims.is_empty() {
             self.overflow = true;
         } else {
             self.overflow = true;
@@ -42,7 +33,7 @@ impl<'a> Cursor for OffsetCursor<'a> {
                     self.overflow = false;
                     break;
                 }
-                self.offset -= self.strides[axis] * self.current_index[axis];
+                self.offset -= self.strides[axis] * self.current_index[axis] as isize;
                 self.current_index[axis] = 0;
             }
         }
@@ -50,7 +41,7 @@ impl<'a> Cursor for OffsetCursor<'a> {
 
     #[inline(always)]
     fn current(&self) -> Self::Output {
-        self.offset
+        self.offset as usize
     }
 
     fn reset(&mut self) {

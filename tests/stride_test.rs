@@ -1,11 +1,10 @@
-
+use pulsars::error::PulsrsError;
 use pulsars::shape::Shape;
 use pulsars::stride::Stride;
-use pulsars::error::PulsrsError;
 
 #[test]
 fn test_stride_construction_from_shape() {
-    let shape : Shape = vec![3,4,5].into();
+    let shape: Shape = vec![3, 4, 5].into();
 
     let stride = Stride::from_shape(&shape);
 
@@ -14,7 +13,7 @@ fn test_stride_construction_from_shape() {
 
 #[test]
 fn test_stride_strides() {
-    let shape : Shape = vec![3,4,5].into();
+    let shape: Shape = vec![3, 4, 5].into();
 
     let stride = Stride::from_shape(&shape);
 
@@ -23,7 +22,7 @@ fn test_stride_strides() {
 
 #[test]
 fn test_stride_get() {
-    let shape : Shape = vec![3,4,5].into();
+    let shape: Shape = vec![3, 4, 5].into();
 
     let stride = Stride::from_shape(&shape);
 
@@ -32,28 +31,35 @@ fn test_stride_get() {
 
 #[test]
 fn test_stride_offset() {
-    let shape : Shape = vec![3,4,5].into();
+    let shape: Shape = vec![3, 4, 5].into();
 
     let stride = Stride::from_shape(&shape);
 
-    assert_eq!(stride.offset(&vec![1,2,3]).unwrap_or(0), 33)
+    assert_eq!(stride.offset(&vec![1, 2, 3]).unwrap_or(0), 33)
 }
 
 #[test]
 fn test_stride_for_scalar() {
-    let shape : Shape = Shape::default();
+    let shape: Shape = Shape::default();
 
     let stride = Stride::from_shape(&shape);
 
     assert_eq!(stride.rank(), 0)
 }
 
-
 #[test]
 fn test_stride_for_offset_error() {
-    let shape: Shape = vec![3,4,5].into();
+    let shape: Shape = vec![3, 4, 5].into();
 
     let stride = Stride::from_shape(&shape);
-    
-    assert_eq!(stride.offset(&[1,2,3,4]).expect_err("Something went wrong in errors"), PulsrsError::RankMismatch { expected: 3, found: 4 })
+
+    assert_eq!(
+        stride
+            .offset(&[1, 2, 3, 4])
+            .expect_err("Something went wrong in errors"),
+        PulsrsError::RankMismatch {
+            expected: 3,
+            found: 4
+        }
+    )
 }

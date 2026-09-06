@@ -1,14 +1,9 @@
-
 #[allow(unused_imports)]
 use pulsars::{
-    cursor::IndexCursor,
-    iterator::{
-        iteration_style::IterStyle,
-        IndexIterator,
-        TensorIterator,
-    },
+    cursor::{Cursor, IndexCursor},
+    error::PulsrsError,
+    iterator::{IndexIterator, TensorIterator, iteration_style::IterStyle},
     tensor::Tensor,
-    error::PulsrsError
 };
 
 // =============================================================================
@@ -27,17 +22,17 @@ fn test_index_cursor_scalar_dims() {
 fn test_index_cursor_basic_advance_c_style() {
     let mut cursor = IndexCursor::new(vec![2, 3], vec![1, 0]);
 
-    assert_eq!(cursor.index(), &[0, 0]);
+    assert_eq!(cursor.current(), &[0, 0]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[0, 1]);
+    assert_eq!(cursor.current(), &[0, 1]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[0, 2]);
+    assert_eq!(cursor.current(), &[0, 2]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[1, 0]);
+    assert_eq!(cursor.current(), &[1, 0]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[1, 1]);
+    assert_eq!(cursor.current(), &[1, 1]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[1, 2]);
+    assert_eq!(cursor.current(), &[1, 2]);
     cursor.advance();
     assert!(cursor.finished());
 }
@@ -46,11 +41,11 @@ fn test_index_cursor_basic_advance_c_style() {
 fn test_index_cursor_advance_f_style() {
     let mut cursor = IndexCursor::new(vec![2, 3], vec![0, 1]);
 
-    assert_eq!(cursor.index(), &[0, 0]);
+    assert_eq!(cursor.current(), &[0, 0]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[1, 0]);
+    assert_eq!(cursor.current(), &[1, 0]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[0, 1]);
+    assert_eq!(cursor.current(), &[0, 1]);
     assert!(!cursor.finished());
 }
 
@@ -64,7 +59,7 @@ fn test_index_cursor_reset() {
 
     cursor.reset();
     assert!(!cursor.finished());
-    assert_eq!(cursor.index(), &[0, 0]);
+    assert_eq!(cursor.current(), &[0, 0]);
 }
 
 #[test]
@@ -72,7 +67,7 @@ fn test_index_cursor_single_dimension() {
     let mut cursor = IndexCursor::new(vec![5], vec![0]);
 
     for i in 0..5 {
-        assert_eq!(cursor.index(), &[i]);
+        assert_eq!(cursor.current(), &[i]);
         cursor.advance();
     }
     assert!(cursor.finished());
@@ -82,15 +77,15 @@ fn test_index_cursor_single_dimension() {
 fn test_index_cursor_three_dimensions() {
     let mut cursor = IndexCursor::new(vec![2, 3, 4], vec![2, 1, 0]);
 
-    assert_eq!(cursor.index(), &[0, 0, 0]);
+    assert_eq!(cursor.current(), &[0, 0, 0]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[0, 0, 1]);
+    assert_eq!(cursor.current(), &[0, 0, 1]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[0, 0, 2]);
+    assert_eq!(cursor.current(), &[0, 0, 2]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[0, 0, 3]);
+    assert_eq!(cursor.current(), &[0, 0, 3]);
     cursor.advance();
-    assert_eq!(cursor.index(), &[0, 1, 0]);
+    assert_eq!(cursor.current(), &[0, 1, 0]);
 }
 
 #[test]
@@ -157,8 +152,12 @@ fn test_index_iterator_2d_c_style() {
     let mut iter = IndexIterator::new(cursor);
 
     let expected = vec![
-        vec![0, 0], vec![0, 1], vec![0, 2],
-        vec![1, 0], vec![1, 1], vec![1, 2],
+        vec![0, 0],
+        vec![0, 1],
+        vec![0, 2],
+        vec![1, 0],
+        vec![1, 1],
+        vec![1, 2],
     ];
 
     for exp in expected {
@@ -174,9 +173,12 @@ fn test_index_iterator_2d_f_style() {
     let mut iter = IndexIterator::new(cursor);
 
     let expected = vec![
-        vec![0, 0], vec![1, 0],
-        vec![0, 1], vec![1, 1],
-        vec![0, 2], vec![1, 2],
+        vec![0, 0],
+        vec![1, 0],
+        vec![0, 1],
+        vec![1, 1],
+        vec![0, 2],
+        vec![1, 2],
     ];
 
     for exp in expected {
@@ -202,10 +204,7 @@ fn test_index_iterator_1d() {
 
 #[test]
 fn test_index_iterator_produces_correct_count() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        (0..24).collect(),
-        vec![2, 3, 4]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector((0..24).collect(), vec![2, 3, 4]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.index_iterator(style);
@@ -217,10 +216,7 @@ fn test_index_iterator_produces_correct_count() {
 #[test]
 fn test_index_iterator_with_custom_priority() {
     let style = IterStyle::Custom(vec![2, 0, 1]);
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        (0..6).collect(),
-        vec![1, 2, 3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector((0..6).collect(), vec![1, 2, 3]).unwrap();
 
     let mut iter = tensor.index_iterator(style);
     let first = iter.next().unwrap();
@@ -233,10 +229,7 @@ fn test_index_iterator_with_custom_priority() {
 
 #[test]
 fn test_tensor_iterator_1d() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![10, 20, 30, 40],
-        vec![4]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![10, 20, 30, 40], vec![4]).unwrap();
 
     let style = IterStyle::Cstyle;
     let mut iter = tensor.tensor_iterator(style);
@@ -250,10 +243,7 @@ fn test_tensor_iterator_1d() {
 
 #[test]
 fn test_tensor_iterator_2d_c_style() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let style = IterStyle::Cstyle;
     let mut iter = tensor.tensor_iterator(style);
@@ -267,10 +257,7 @@ fn test_tensor_iterator_2d_c_style() {
 
 #[test]
 fn test_tensor_iterator_2d_f_style() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let style = IterStyle::Fstyle;
     let mut iter = tensor.tensor_iterator(style);
@@ -284,10 +271,7 @@ fn test_tensor_iterator_2d_f_style() {
 
 #[test]
 fn test_tensor_iterator_collect() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -298,10 +282,7 @@ fn test_tensor_iterator_collect() {
 
 #[test]
 fn test_tensor_iterator_count() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        (0..120).collect(),
-        vec![2, 3, 4, 5]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector((0..120).collect(), vec![2, 3, 4, 5]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -310,10 +291,8 @@ fn test_tensor_iterator_count() {
 
 #[test]
 fn test_tensor_iterator_3d() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6, 7, 8],
-        vec![2, 2, 2]
-    ).unwrap();
+    let tensor: Tensor<i32> =
+        Tensor::from_vector(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![2, 2, 2]).unwrap();
 
     let style = IterStyle::Cstyle;
     let mut iter = tensor.tensor_iterator(style);
@@ -358,10 +337,7 @@ fn test_iterator_scalar_tensor_f_style() {
 #[test]
 #[allow(unused_mut)]
 fn test_iterator_zero_size_dimension() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![],
-        vec![0, 3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![], vec![0, 3]).unwrap();
 
     let style = IterStyle::Cstyle;
     let mut iter = tensor.tensor_iterator(style);
@@ -370,10 +346,7 @@ fn test_iterator_zero_size_dimension() {
 
 #[test]
 fn test_iterator_single_element() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![99],
-        vec![1]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![99], vec![1]).unwrap();
 
     let style = IterStyle::Cstyle;
     let mut iter = tensor.tensor_iterator(style);
@@ -384,10 +357,7 @@ fn test_iterator_single_element() {
 
 #[test]
 fn test_iterator_singleton_dimensions() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3],
-        vec![1, 1, 3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3], vec![1, 1, 3]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -402,10 +372,7 @@ fn test_iterator_singleton_dimensions() {
 
 #[test]
 fn test_tensor_index_trait_1d() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![10, 20, 30],
-        vec![3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![10, 20, 30], vec![3]).unwrap();
 
     assert_eq!(tensor[&[0]], 10);
     assert_eq!(tensor[&[1]], 20);
@@ -414,10 +381,7 @@ fn test_tensor_index_trait_1d() {
 
 #[test]
 fn test_tensor_index_trait_2d() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     assert_eq!(tensor[&[0, 0]], 1);
     assert_eq!(tensor[&[0, 1]], 2);
@@ -434,10 +398,7 @@ fn test_tensor_index_trait_scalar() {
 #[test]
 #[should_panic]
 fn test_tensor_index_trait_panics_on_oob() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3],
-        vec![3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3], vec![3]).unwrap();
 
     let _ = tensor[&[10]];
 }
@@ -445,10 +406,7 @@ fn test_tensor_index_trait_panics_on_oob() {
 #[test]
 #[should_panic]
 fn test_tensor_index_trait_panics_on_wrong_rank() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3],
-        vec![3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3], vec![3]).unwrap();
 
     let _ = tensor[&[0, 0]];
 }
@@ -459,10 +417,7 @@ fn test_tensor_index_trait_panics_on_wrong_rank() {
 
 #[test]
 fn test_iterate_then_verify_with_get() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![6]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![6]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -476,10 +431,7 @@ fn test_iterate_then_verify_with_get() {
 
 #[test]
 fn test_iterate_after_reshape() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        (0..12).collect(),
-        vec![3, 4]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector((0..12).collect(), vec![3, 4]).unwrap();
 
     let reshaped = tensor.reshape(vec![4, 3]).unwrap();
     let style = IterStyle::Cstyle;
@@ -492,10 +444,7 @@ fn test_iterate_after_reshape() {
 
 #[test]
 fn test_iterate_after_permute() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let transposed = tensor.permute(vec![1, 0]).unwrap();
     let style = IterStyle::Cstyle;
@@ -507,10 +456,7 @@ fn test_iterate_after_permute() {
 
 #[test]
 fn test_index_iterator_after_contiguous() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        (0..24).collect(),
-        vec![2, 3, 4]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector((0..24).collect(), vec![2, 3, 4]).unwrap();
 
     let transposed = tensor.permute(vec![2, 1, 0]).unwrap();
     let contiguous = transposed.contiguous();
@@ -524,10 +470,7 @@ fn test_index_iterator_after_contiguous() {
 
 #[test]
 fn test_iterate_flattened_tensor() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6],
-        vec![2, 3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5, 6], vec![2, 3]).unwrap();
 
     let flat = tensor.flatten().unwrap();
     let style = IterStyle::Cstyle;
@@ -545,10 +488,7 @@ fn test_iterate_flattened_tensor() {
 
 #[test]
 fn test_c_style_order_2d() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![0, 1, 2, 3, 4, 5],
-        vec![2, 3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![0, 1, 2, 3, 4, 5], vec![2, 3]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -559,10 +499,7 @@ fn test_c_style_order_2d() {
 
 #[test]
 fn test_c_style_order_3d() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        (0..24).collect(),
-        vec![2, 3, 4]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector((0..24).collect(), vec![2, 3, 4]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -573,10 +510,7 @@ fn test_c_style_order_3d() {
 
 #[test]
 fn test_f_style_order_2d() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        (0..6).collect(),
-        vec![2, 3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector((0..6).collect(), vec![2, 3]).unwrap();
 
     let style = IterStyle::Fstyle;
     let iter = tensor.tensor_iterator(style);
@@ -588,18 +522,14 @@ fn test_f_style_order_2d() {
 
 #[test]
 fn test_f_style_order_3d() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        (0..24).collect(),
-        vec![2, 3, 4]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector((0..24).collect(), vec![2, 3, 4]).unwrap();
 
     let style = IterStyle::Fstyle;
     let iter = tensor.tensor_iterator(style);
     let collected: Vec<i32> = iter.collect();
 
     let expected = vec![
-        0, 12, 4, 16, 8, 20, 1, 13, 5, 17, 9, 21,
-        2, 14, 6, 18, 10, 22, 3, 15, 7, 19, 11, 23
+        0, 12, 4, 16, 8, 20, 1, 13, 5, 17, 9, 21, 2, 14, 6, 18, 10, 22, 3, 15, 7, 19, 11, 23,
     ];
     assert_eq!(collected, expected);
 }
@@ -610,10 +540,7 @@ fn test_f_style_order_3d() {
 
 #[test]
 fn test_iteration_covers_exactly_numel() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        (0..60).collect(),
-        vec![3, 4, 5]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector((0..60).collect(), vec![3, 4, 5]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -622,10 +549,7 @@ fn test_iteration_covers_exactly_numel() {
 
 #[test]
 fn test_iteration_produces_all_valid_indices() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![0; 12],
-        vec![3, 4]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![0; 12], vec![3, 4]).unwrap();
 
     let mut index_iter = tensor.index_iterator(IterStyle::Cstyle);
     let mut seen = vec![vec![0usize; 2]; 12];
@@ -642,10 +566,7 @@ fn test_iteration_produces_all_valid_indices() {
 
 #[test]
 fn test_all_indices_unique_during_iteration() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![0; 24],
-        vec![2, 3, 4]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![0; 24], vec![2, 3, 4]).unwrap();
 
     let mut index_iter = tensor.index_iterator(IterStyle::Cstyle);
     let mut seen = std::collections::HashSet::new();
@@ -665,10 +586,7 @@ fn test_all_indices_unique_during_iteration() {
 
 #[test]
 fn test_custom_iteration_order_reversed() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let style = IterStyle::Custom(vec![1, 0]);
     let iter = tensor.tensor_iterator(style);
@@ -679,10 +597,8 @@ fn test_custom_iteration_order_reversed() {
 
 #[test]
 fn test_custom_iteration_order_middle_slowest() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5, 6, 7, 8],
-        vec![2, 2, 2]
-    ).unwrap();
+    let tensor: Tensor<i32> =
+        Tensor::from_vector(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![2, 2, 2]).unwrap();
 
     let style = IterStyle::Custom(vec![1, 2, 0]);
     let iter = tensor.tensor_iterator(style);
@@ -697,10 +613,7 @@ fn test_custom_iteration_order_middle_slowest() {
 
 #[test]
 fn test_tensor_iterator_sum() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5],
-        vec![5]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5], vec![5]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -711,10 +624,7 @@ fn test_tensor_iterator_sum() {
 
 #[test]
 fn test_tensor_iterator_fold() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4],
-        vec![2, 2]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4], vec![2, 2]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -725,10 +635,7 @@ fn test_tensor_iterator_fold() {
 
 #[test]
 fn test_tensor_iterator_enumerate() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![10, 20, 30],
-        vec![3]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![10, 20, 30], vec![3]).unwrap();
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
@@ -740,10 +647,7 @@ fn test_tensor_iterator_enumerate() {
 
 #[test]
 fn test_tensor_iterator_find() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5],
-        vec![5]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5], vec![5]).unwrap();
 
     let style = IterStyle::Cstyle;
     let mut iter = tensor.tensor_iterator(style);
@@ -754,10 +658,7 @@ fn test_tensor_iterator_find() {
 
 #[test]
 fn test_tensor_iterator_any() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![1, 2, 3, 4, 5],
-        vec![5]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![1, 2, 3, 4, 5], vec![5]).unwrap();
 
     let style = IterStyle::Cstyle;
     let mut iter = tensor.tensor_iterator(style);
@@ -766,10 +667,7 @@ fn test_tensor_iterator_any() {
 
 #[test]
 fn test_tensor_iterator_all() {
-    let tensor: Tensor<i32> = Tensor::from_vector(
-        vec![2, 4, 6, 8],
-        vec![4]
-    ).unwrap();
+    let tensor: Tensor<i32> = Tensor::from_vector(vec![2, 4, 6, 8], vec![4]).unwrap();
 
     let style = IterStyle::Cstyle;
     let mut iter = tensor.tensor_iterator(style);

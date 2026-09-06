@@ -1,6 +1,8 @@
 
 use std::{fmt::Debug, ops::{Add, Div, Mul}};
 
+use crate::dtype::Element;
+
 use super::Tensor;
 use num_traits::FromPrimitive;
 
@@ -8,7 +10,7 @@ use num_traits::FromPrimitive;
 // simple methods
 impl<T> Tensor<T> 
 where 
-    T: Copy + Debug
+    T: Copy + Debug + Element
 {
     pub fn reduce_sum(&self, axes: &[usize]) -> Self 
     where 
@@ -54,7 +56,7 @@ where
 //complex methods
 impl<T> Tensor<T> 
 where
-    T: Copy + Debug
+    T: Copy + Debug + Element
 {
     pub fn reduce_mean(&self, axes: &[usize]) -> Self
     where 

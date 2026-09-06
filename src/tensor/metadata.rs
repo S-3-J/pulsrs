@@ -1,7 +1,9 @@
 
+use crate::dtype::{DType, Element};
+
 use super::{Tensor, Shape};
 
-impl<T> Tensor<T> {
+impl<T: Element> Tensor<T> {
     // calculate rank
     pub fn rank(&self) -> usize {
         self.shape().rank()
@@ -17,7 +19,7 @@ impl<T> Tensor<T> {
     }
 
     // strides
-    pub fn strides(&self) -> &[usize] {
+    pub fn strides(&self) -> &[isize] {
         self.stride.strides()
     }
 
@@ -32,5 +34,13 @@ impl<T> Tensor<T> {
     // scalar check
     pub fn is_scalar(&self) -> bool {
         self.rank() == 0
+    }
+
+    pub fn offset(&self) -> usize {
+        self.offset
+    }
+
+    pub fn dtype(&self) -> DType {
+        self.dtype
     }
 }

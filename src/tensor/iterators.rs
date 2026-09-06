@@ -1,14 +1,13 @@
 use super::Tensor;
 use crate::{
-    cursor::IndexCursor, 
-    iterator::{
+    cursor::IndexCursor, dtype::Element, iterator::{
         IndexIterator, 
         TensorIterator, 
         iteration_style::*
     }
 };
 
-impl<T> Tensor<T> {
+impl<T: Element> Tensor<T> {
 
     pub fn index_iterator(&self, style: IterStyle) -> IndexIterator {
 
