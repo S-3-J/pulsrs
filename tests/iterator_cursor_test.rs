@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use pulsars::{
+use pulsrs::{
     cursor::{Cursor, IndexCursor},
     error::PulsrsError,
     iterator::{IndexIterator, TensorIterator, iteration_style::IterStyle},
@@ -554,8 +554,8 @@ fn test_iteration_produces_all_valid_indices() {
     let mut index_iter = tensor.index_iterator(IterStyle::Cstyle);
     let mut seen = vec![vec![0usize; 2]; 12];
 
-    for i in 0..12 {
-        seen[i] = index_iter.next().unwrap();
+    for item in &mut seen {
+        *item = index_iter.next().unwrap();
     }
 
     for idx in &seen {
@@ -568,10 +568,10 @@ fn test_iteration_produces_all_valid_indices() {
 fn test_all_indices_unique_during_iteration() {
     let tensor: Tensor<i32> = Tensor::from_vector(vec![0; 24], vec![2, 3, 4]).unwrap();
 
-    let mut index_iter = tensor.index_iterator(IterStyle::Cstyle);
+    let index_iter = tensor.index_iterator(IterStyle::Cstyle);
     let mut seen = std::collections::HashSet::new();
 
-    while let Some(idx) = index_iter.next() {
+    for idx in index_iter {
         let key = (idx[0], idx[1], idx[2]);
         assert!(!seen.contains(&key));
         seen.insert(key);
@@ -628,7 +628,7 @@ fn test_tensor_iterator_fold() {
 
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
-    let product: i32 = iter.fold(1, |acc, x| acc * x);
+    let product: i32 = iter.product();
 
     assert_eq!(product, 24);
 }
@@ -640,7 +640,7 @@ fn test_tensor_iterator_enumerate() {
     let style = IterStyle::Cstyle;
     let iter = tensor.tensor_iterator(style);
 
-    let indexed: Vec<(usize, i32)> = iter.enumerate().map(|(i, v)| (i, v)).collect();
+    let indexed: Vec<(usize, i32)> = iter.enumerate().collect();
 
     assert_eq!(indexed, vec![(0, 10), (1, 20), (2, 30)]);
 }

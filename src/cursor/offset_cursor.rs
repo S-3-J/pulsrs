@@ -16,6 +16,7 @@ impl<'a> OffsetCursor<'a> {
             priority,
             current_index: vec![0usize; dims.len()],
             offset,
+            absolute_offset: offset,
             overflow: false,
             filled,
         }
@@ -52,7 +53,7 @@ impl<'a> Cursor for OffsetCursor<'a> {
     fn reset(&mut self) {
         self.current_index.fill(0);
         self.overflow = false;
-        self.offset = 0;
+        self.offset = self.absolute_offset;
     }
 
     fn finished(&self) -> bool {

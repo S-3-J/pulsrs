@@ -1,4 +1,4 @@
-use pulsars::prelude::*;
+use pulsrs::prelude::*;
 
 #[test]
 fn test_slice_rank_mismatch_fewer_ranges() {
@@ -23,7 +23,7 @@ fn test_slice_rank_mismatch_more_ranges() {
 
 #[test]
 fn test_slice_basic() {
-    let t = Tensor::<f32>::arange(1.0, 12.0, 1.0)
+    let t = Tensor::<f32>::arange(1.0, 13.0, 1.0)
         .reshape(vec![3, 4])
         .unwrap();
     // Slice first row, first two columns
@@ -35,7 +35,7 @@ fn test_slice_basic() {
 
 #[test]
 fn test_slice_with_none() {
-    let t = Tensor::<f32>::arange(1.0, 12.0, 1.0)
+    let t = Tensor::<f32>::arange(1.0, 13.0, 1.0)
         .reshape(vec![3, 4])
         .unwrap();
     // Slice first row (index 0), first two columns take element at index 0
@@ -47,7 +47,7 @@ fn test_slice_with_none() {
 
 #[test]
 fn test_slice_step() {
-    let t = Tensor::<f32>::arange(1.0, 10.0, 1.0)
+    let t = Tensor::<f32>::arange(1.0, 11.0, 1.0)
         .reshape(vec![2, 5])
         .unwrap();
     // Slice first row (index 0 ), with step 2: take every other element
@@ -60,7 +60,7 @@ fn test_slice_step() {
 
 #[test]
 fn test_slice_out_of_bounds() {
-    let t = Tensor::<f32>::arange(1.0, 9.0, 1.0)
+    let t = Tensor::<f32>::arange(1.0, 10.0, 1.0)
         .reshape(vec![3, 3])
         .unwrap();
     // Start beyond dimension size

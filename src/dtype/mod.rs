@@ -1,3 +1,6 @@
+//! # Data Types
+//! Pulsrs explicitly supports
+#[doc(hidden)]
 pub mod element_implementations;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
