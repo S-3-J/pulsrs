@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use pulsars::{
+use pulsrs::{
     cursor::{Cursor, IndexCursor},
     error::PulsrsError,
     iterator::{IndexIterator, TensorIterator, iteration_style::IterStyle},
