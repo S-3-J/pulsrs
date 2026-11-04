@@ -1,4 +1,4 @@
-use pulsars::tensor::Tensor;
+use pulsrs::tensor::Tensor;
 
 fn main() {
     let t1 = Tensor::from_vector(
@@ -14,5 +14,5 @@ fn main() {
             .collect(),
     );
 
-    print!("{}\n", t1);
+    println!("{}", t1);
 }

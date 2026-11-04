@@ -1,0 +1,3 @@
+Tensor:
+    1. Time taken by contiguous
+    2. Time taken by mappings
