@@ -1,6 +1,6 @@
-use pulsars::prelude::*;
+use pulsrs::prelude::*;
 #[allow(unused_imports)]
-use pulsars::{error::PulsrsError, shape::Shape, stride::Stride, tensor::Tensor};
+use pulsrs::{error::PulsrsError, shape::Shape, stride::Stride, tensor::Tensor};
 
 // =============================================================================
 // SCALAR TENSOR TESTS
