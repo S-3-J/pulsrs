@@ -1,14 +1,16 @@
-use pulsars::prelude::*;
+use pulsrs::iterator::iteration_style::IterStyle;
+use pulsrs::prelude::*;
 
 fn main() {
-    let t2 = Tensor::<i8>::arange(1, 30, 1)
-        .reshape(vec![5, 2, 3])
-        .expect("Some bruh!");
-    let t3 = t2
-        .slice(vec![(..).iosr(), None, (..).iosr(), (..).iosr()])
+    let t1 = Tensor::<i16>::arange(1, 10, 1)
+        .reshape(vec![3, 3])
         .unwrap()
-        .broadcast(&[2, 5, 2, 2, 3]);
+        .slice(vec![(.., -1).iosr(), (..).iosr()]);
 
-    print!("{}\n\n", t2);
-    print!("{}\n\n", t3);
+    if let Ok(x) = t1 {
+        let a = x.tensor_iterator(IterStyle::Fstyle).collect::<Vec<_>>();
+        print!("{:?}", a);
+    } else {
+        panic!("{}", t1.unwrap_err())
+    }
 }

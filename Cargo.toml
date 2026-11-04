@@ -1,8 +1,24 @@
 [package]
-name = "pulsars"
+name = "pulsrs"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 num-traits = "0.2.19"
 rand = "0.10.2"
+
+[dev-dependencies]
+criterion = "0.8.2"
+plotters = "0.3.7"
+
+[[bench]]
+name = "tensor_reshape_benchmark"
+harness = false
+
+[[bench]]
+name = "tensor_operations_benchmark"
+harness = false
+
+[[bench]]
+name = "contiguous_tensor_operations_benchmark"
+harness = false

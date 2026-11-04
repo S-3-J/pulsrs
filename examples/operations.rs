@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use pulsars::tensor::*;
+use pulsrs::tensor::*;
 
 fn main() {
     let t1 = Tensor::from_vector(
@@ -18,18 +18,18 @@ fn main() {
 
     let time_t3 = start.elapsed();
 
-    print!("Time for contiguous: {:?}\n", time_t3);
-    print!("Amortized Time for contiguous: {:?}\n", time_t3 / 1000);
+    println!("Time for contiguous: {:?}", time_t3);
+    println!("Amortized Time for contiguous: {:?}", time_t3 / 1000);
 
     for _ in 0..100 {
         let _ = t2.try_add(&t2).unwrap();
     }
 
     let time_t4 = start.elapsed();
-    print!("Time for non contiguous: {:?}\n", time_t4 - time_t3);
-    print!(
-        "Amortized Time for contiguous: {:?}\n",
+    println!("Time for non contiguous: {:?}", time_t4 - time_t3);
+    println!(
+        "Amortized Time for contiguous: {:?}",
         (time_t4 - time_t3) / 1000
     );
-    print!("Total: {:?}\n", time_t4)
+    println!("Total: {:?}", time_t4)
 }

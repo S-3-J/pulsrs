@@ -1,6 +1,6 @@
 # Phase 0 Worktree Classification
 
-Status: **classified by category; acceptance/commit decision remains open**
+Status: **classified, split, committed, and locally validated**
 
 The current worktree contains a large development batch relative to the last commit. This file prevents those changes from being mistaken for a clean, released baseline.
 
@@ -42,17 +42,17 @@ The following modified tracked areas are part of the active experimental tensor-
 
 ## Proposed clean-start commit split
 
-The corresponding local branches have been created from `master`:
+The corresponding local branches now form a dependency-aware sequence:
 
 | Branch | Intended scope | Depends on |
 |---|---|---|
 | `phase-0-tooling-context` | CI, planning context, `.gitignore`, formatting/tooling cleanup | `master` |
-| `vectorizable-setup` | Vectorization marker and minimal kernel setup | `master` |
-| `error-refinement` | Typed error families, conversions, and error tests | `master` |
-| `tensor-core-integration` | Tensor, iterator, layout, mapping, and operation integration | `master` plus accepted prerequisite commits as needed |
-| `benchmarks-examples` | Benchmark targets and example updates | `master` plus the API commits they exercise |
+| `vectorizable-setup` | Vectorization marker and minimal kernel setup | `phase-0-tooling-context` |
+| `error-refinement` | Typed error families, conversions, and dependent call-site migration | `vectorizable-setup` |
+| `tensor-core-integration` | Tensor, iterator, layout, mapping, and operation integration | `error-refinement` |
+| `benchmarks-examples` | Benchmark targets and example updates | `tensor-core-integration` |
 
-These branches are initially pointers to `master`; creating them does not automatically distribute the current dirty worktree. Changes must be selectively staged or applied on the appropriate branch, then validated and committed there.
+The branches have been selectively staged, validated, and committed in dependency order. The current worktree is clean on `benchmarks-examples`; remote publication remains intentionally separate.
 
 ### Commit A — Vectorizable setup only
 
@@ -65,7 +65,7 @@ Eligible contents:
 
 Do **not** include tensor semantic changes, reductions, public operator-bound changes, examples, or benchmark rewrites in this commit.
 
-Current blockers before accepting the vectorization portion:
+The vectorizable foundation was committed as `2d5502e` (`feat: add vectorizable kernel foundation`). It is intentionally a setup commit, not a claim that architecture-specific SIMD is complete. Current follow-up blockers remain:
 
 - `Vectorizable` is declared public while its module and sealing trait are private; this creates a confusing public-boundary/API situation.
 - The `BinarySimdKernel`, `UnarySimdKernel`, and `FunctionSimdKernel` names imply SIMD, but their bodies are ordinary iterator loops and no vector instructions are established.
@@ -82,7 +82,7 @@ Eligible contents:
 - mechanical call-site migration;
 - focused tests for every public error variant and message.
 
-Current blockers before accepting the error portion:
+The error refinement was committed as `299e458` (`refactor: establish typed tensor error families`). It includes the dependent tensor call-site migration required for the new error families. Current follow-up concerns remain:
 
 - the flat `PulsrsError` variants were replaced by nested families, which is a deliberate public API break and must be explicitly accepted;
 - several names contain stable-looking spelling issues (`Uncompatible`, `OutofBounds`, `Uncompabtible`);
@@ -99,7 +99,15 @@ Keep CI, plans, formatting-only changes, examples, and benchmark harness changes
 
 ## Eligibility decision
 
-**Current answer: not eligible as one commit.** The current worktree is eligible for a clean start only after the batch is split and the proposed branch commits are narrowed to behaviorally justified changes. The existing compile, test, formatting, and strict-Clippy gates are necessary but do not resolve the scope and API-boundary issues above.
+**Current answer: eligible after splitting, not as one commit.** The worktree has now been split into validated local commits:
+
+- `804bea6` — `chore: establish phase 0 project baseline`
+- `2d5502e` — `feat: add vectorizable kernel foundation`
+- `299e458` — `refactor: establish typed tensor error families`
+- `e32d3ce` — `feat: integrate tensor core operations and views`
+- `d873216` — `perf: add benchmark and example baseline`
+
+The branches are clean and ordered, but the vectorization names/API and typed-error public spellings still need later review before being treated as final contracts.
 
 ## Commands for refreshing this inventory
 

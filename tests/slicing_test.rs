@@ -1,4 +1,4 @@
-use pulsars::prelude::*;
+use pulsrs::prelude::*;
 
 #[test]
 fn test_slice_rank_mismatch_fewer_ranges() {
