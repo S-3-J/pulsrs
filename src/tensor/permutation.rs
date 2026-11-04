@@ -1,4 +1,7 @@
-use crate::dtype::Element;
+use crate::{
+    dtype::Element,
+    error::{BadPractices, ShapeError},
+};
 
 use super::{PulsrsError, Rc, Shape, Stride, Tensor};
 use std::collections::HashSet;
@@ -11,10 +14,11 @@ where
     pub fn permute(&self, permutation: Vec<usize>) -> Result<Self, PulsrsError> {
         if self.is_scalar() {
             if !permutation.is_empty() {
-                return Err(PulsrsError::RankMismatch {
+                return Err(ShapeError::RankMismatch {
                     expected: 0,
                     found: permutation.len(),
-                });
+                }
+                .into());
             }
             return Ok(self.clone());
         }
@@ -26,14 +30,17 @@ where
 
             for i in &permutation {
                 if i >= &self.rank() {
-                    return Err(PulsrsError::AxisOutofBounds {
+                    return Err(BadPractices::AxisOutofBounds {
                         max: self.rank(),
                         min: 0,
                         found: *i,
-                    });
+                    }
+                    .into());
                 }
                 if !index_set.insert(*i) {
-                    return Err(PulsrsError::UniqueDataConstraintError { given: permutation });
+                    return Err(
+                        BadPractices::UniqueDataConstraintError { given: permutation }.into(),
+                    );
                 }
             }
 
@@ -41,10 +48,11 @@ where
             let curr_strides = self.strides();
 
             if curr_shape_dim.len() != permutation.len() {
-                Err(PulsrsError::RankMismatch {
+                Err(ShapeError::RankMismatch {
                     expected: curr_shape_dim.len(),
                     found: permutation.len(),
-                })
+                }
+                .into())
             } else {
                 let mut permuted_shape = vec![0; curr_shape_dim.len()];
                 let mut permuted_stride = vec![1; curr_strides.len()];

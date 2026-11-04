@@ -3,7 +3,7 @@ use std::{
     ops::{Add, Div, Mul},
 };
 
-use crate::dtype::Element;
+use crate::simd::Vectorizable;
 
 use super::Tensor;
 use num_traits::FromPrimitive;
@@ -11,7 +11,7 @@ use num_traits::FromPrimitive;
 // simple methods
 impl<T> Tensor<T>
 where
-    T: Copy + Debug + Element,
+    T: Copy + Debug + Vectorizable + Default,
 {
     pub fn reduce_sum(&self, axes: &[usize]) -> Self
     where
@@ -45,11 +45,11 @@ where
 //complex methods
 impl<T> Tensor<T>
 where
-    T: Copy + Debug + Element,
+    T: Copy + Debug + Vectorizable + FromPrimitive + Default,
 {
     pub fn reduce_mean(&self, axes: &[usize]) -> Self
     where
-        T: Add<Output = T> + FromPrimitive,
+        T: Add<Output = T>,
         for<'a> &'a Tensor<T>: Div<T, Output = Tensor<T>>,
     {
         let dims = self.shape().dims().to_vec();

@@ -1,25 +1,41 @@
 use std::{collections::HashSet, fmt::Debug, iter::zip};
 
 use crate::{
-    dtype::Element, error::PulsrsError, iterator::iteration_style::IterStyle, shape::Shape,
+    dtype::Element,
+    error::{BadPractices, MappingError, PulsrsError},
+    iterator::iteration_style::IterStyle,
+    kernels::{BinarySimdKernel, FunctionSimdKernel, UnarySimdKernel},
+    shape::Shape,
+    simd::Vectorizable,
 };
 
 use super::Tensor;
 
-impl<T: Element> Tensor<T> {
+impl<T: Vectorizable + Default> Tensor<T> {
     // a function applyer
     pub fn function_map<F, K>(&self, ops: F) -> Tensor<K>
     where
         T: Copy + Debug,
         F: Fn(T) -> K,
-        K: Element,
+        K: Vectorizable,
     {
-        let mut buffer: Vec<K> = Vec::with_capacity(self.numel());
-        let mut elements = self.tensor_iterator(IterStyle::Cstyle);
+        let buffer: Vec<K> = if self.is_contiguous() {
+            let mut buffer = vec![K::zero(); self.numel()];
+            let fx_kernel = FunctionSimdKernel::<T, K>::try_new();
 
-        for e in &mut elements {
-            buffer.push(ops(e))
-        }
+            fx_kernel.operate(self.buffer_as_slice().unwrap(), buffer.as_mut_slice(), ops);
+
+            buffer
+        } else {
+            let mut buffer = Vec::<K>::with_capacity(self.numel());
+            let mut elements = self.tensor_iterator(IterStyle::Cstyle);
+
+            for e in &mut elements {
+                buffer.push(ops(e))
+            }
+
+            buffer
+        };
 
         Tensor::from_vector(buffer, self.shape().dims().to_vec()).unwrap()
     }
@@ -29,14 +45,30 @@ impl<T: Element> Tensor<T> {
     where
         T: Copy + Debug,
         F: Fn(T, T) -> K,
-        K: Element,
+        K: Vectorizable,
     {
-        let mut buffer: Vec<K> = Vec::with_capacity(self.numel());
-        let mut elements = self.tensor_iterator(IterStyle::Cstyle);
+        let buffer: Vec<K> = if self.contiguous {
+            let mut buffer = vec![K::zero(); self.numel()];
 
-        for e in &mut elements {
-            buffer.push(ops(e, other))
-        }
+            let unary_kernel = UnarySimdKernel::<T, K>::try_new();
+
+            unary_kernel.operate(
+                self.buffer_as_slice().unwrap(),
+                other,
+                buffer.as_mut_slice(),
+                ops,
+            );
+            buffer
+        } else {
+            let mut buffer = Vec::with_capacity(self.numel());
+            let mut elements = self.tensor_iterator(IterStyle::Cstyle);
+
+            for e in &mut elements {
+                buffer.push(ops(e, other))
+            }
+
+            buffer
+        };
 
         Tensor::from_vector(buffer, self.shape().dims().to_vec()).unwrap()
     }
@@ -65,25 +97,41 @@ impl<T: Element> Tensor<T> {
 
     pub fn try_elementwise_map<F, K>(&self, other: &Self, ops: F) -> Result<Tensor<K>, PulsrsError>
     where
-        T: Copy + Debug,
+        T: Copy + Debug + Vectorizable,
         F: Fn(T, T) -> K,
-        K: Element,
+        K: Element + Vectorizable,
     {
         if self.shape() != other.shape() {
-            return Err(PulsrsError::BinaryMappingError {
+            return Err(MappingError::BinaryMappingError {
                 shape1: self.shape().clone(),
                 shape2: other.shape().clone(),
                 message: "Incompatible shapes.".to_string(),
-            });
+            }
+            .into());
         }
 
-        let mut buffer: Vec<K> = Vec::with_capacity(self.numel());
-        let mut self_iterator = self.tensor_iterator(IterStyle::Cstyle);
-        let mut other_iterator = other.tensor_iterator(IterStyle::Cstyle);
+        let buffer: Vec<K> = if self.contiguous && other.contiguous {
+            let binary_kernel = BinarySimdKernel::<T, K>::try_new();
+            let mut buffer = vec![K::zero(); self.numel()];
 
-        for (a, b) in zip(&mut self_iterator, &mut other_iterator) {
-            buffer.push(ops(a, b));
-        }
+            binary_kernel.operate(
+                self.buffer_as_slice().unwrap(),
+                other.buffer.as_slice(),
+                buffer.as_mut_slice(),
+                &ops,
+            );
+            buffer
+        } else {
+            let mut buffer = Vec::with_capacity(self.numel());
+            let mut self_iterator = self.tensor_iterator(IterStyle::Cstyle);
+            let mut other_iterator = other.tensor_iterator(IterStyle::Cstyle);
+
+            for (a, b) in zip(&mut self_iterator, &mut other_iterator) {
+                buffer.push(ops(a, b));
+            }
+
+            buffer
+        };
 
         Tensor::from_vector(buffer, self.shape().dims().to_vec())
     }
@@ -175,18 +223,19 @@ impl<T: Element> Tensor<T> {
 
             for &axis in axes.iter() {
                 if axis >= self.ndim() {
-                    return Err(PulsrsError::AxisOutofBounds {
+                    return Err(BadPractices::AxisOutofBounds {
                         max: self.ndim(),
                         min: 0,
                         found: axis,
-                    });
+                    }
+                    .into());
                 }
             }
 
             let mut member = HashSet::new();
 
             if !axes.iter().all(|a| member.insert(*a)) {
-                return Err(PulsrsError::UniqueDataConstraintError { given: axes });
+                return Err(BadPractices::UniqueDataConstraintError { given: axes }.into());
             }
 
             axes.sort_unstable();

@@ -1,6 +1,9 @@
 use std::ops::Index;
 
-use crate::dtype::Element;
+use crate::{
+    dtype::Element,
+    error::{BadPractices, ShapeError, TensorError},
+};
 
 use super::{PulsrsError, Tensor};
 
@@ -8,58 +11,66 @@ impl<T: Element + Copy> Tensor<T> {
     pub fn get(&self, indices: &[usize]) -> Result<T, PulsrsError> {
         if self.is_scalar() {
             if !indices.is_empty() {
-                return Err(PulsrsError::TensorIndexingError {
+                return Err(TensorError::TensorIndexingError {
                     shape: self.shape().clone(),
                     indices: indices.to_vec(),
-                });
+                }
+                .into());
             }
 
             Ok(self.buffer[self.offset])
         } else {
             if indices.len() != self.rank() {
-                return Err(PulsrsError::RankMismatch {
+                return Err(ShapeError::RankMismatch {
                     expected: self.rank(),
                     found: indices.len(),
-                });
+                }
+                .into());
             }
 
             for i in 0..self.rank() {
                 if indices[i] >= self.shape().dims()[i] {
-                    return Err(PulsrsError::TensorIndexingError {
+                    return Err(TensorError::TensorIndexingError {
                         shape: self.shape().clone(),
                         indices: indices.to_vec(),
-                    });
+                    }
+                    .into());
                 }
             }
 
             let offset = self.stride.offset(indices)?;
 
             if offset.unsigned_abs() >= self.buffer.len() {
-                Err(PulsrsError::IndexOutofBounds {
+                Err(BadPractices::IndexOutofBounds {
                     max: self.rank(),
                     found: offset.unsigned_abs(),
-                })
+                }
+                .into())
             } else {
                 Ok(self.buffer[(self.offset as isize + offset) as usize])
             }
         }
     }
 
-    pub(crate) fn get_from_offset(&self, offset: usize) -> Result<T, PulsrsError> {
+    pub(crate) fn get_from_offset(&self, offset: usize, absolute: bool) -> Result<T, PulsrsError> {
         if self.is_scalar() {
             if offset != 0 {
-                return Err(PulsrsError::IndexOutofBounds {
+                return Err(BadPractices::IndexOutofBounds {
                     max: self.rank(),
                     found: offset,
-                });
+                }
+                .into());
             }
 
             Ok(self.buffer[0])
         } else if offset >= self.buffer.len() {
-            Err(PulsrsError::TensorIndexingError {
+            Err(TensorError::TensorIndexingError {
                 shape: self.shape().clone(),
                 indices: vec![offset],
-            })
+            }
+            .into())
+        } else if absolute {
+            Ok(self.buffer[offset])
         } else {
             Ok(self.buffer[self.offset + offset])
         }
@@ -76,7 +87,7 @@ impl<T: Element> Index<&[usize]> for Tensor<T> {
             } else {
                 panic!(
                     "{}",
-                    &PulsrsError::TensorIndexingError {
+                    &TensorError::TensorIndexingError {
                         shape: self.shape().clone(),
                         indices: index.to_vec()
                     }
@@ -87,7 +98,7 @@ impl<T: Element> Index<&[usize]> for Tensor<T> {
         if self.rank() != index.len() {
             panic!(
                 "{}",
-                PulsrsError::TensorIndexingError {
+                TensorError::TensorIndexingError {
                     shape: self.shape().clone(),
                     indices: index.to_vec()
                 }
@@ -98,7 +109,7 @@ impl<T: Element> Index<&[usize]> for Tensor<T> {
             if index[i] >= self.shape().dims()[i] {
                 panic!(
                     "{}",
-                    PulsrsError::TensorIndexingError {
+                    TensorError::TensorIndexingError {
                         shape: self.shape().clone(),
                         indices: index.to_vec()
                     }
@@ -109,7 +120,7 @@ impl<T: Element> Index<&[usize]> for Tensor<T> {
         let offset_wrapper = self.stride.offset(index);
 
         let Ok(offset) = offset_wrapper else {
-            panic!("{}", offset_wrapper.unwrap_err())
+            panic!("{}", offset_wrapper.unwrap_err());
         };
 
         &self.buffer[(self.offset as isize + offset) as usize]

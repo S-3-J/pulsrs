@@ -1,6 +1,6 @@
-use pulsars::error::PulsrsError;
-use pulsars::shape::Shape;
-use pulsars::stride::Stride;
+use pulsrs::error::ShapeError;
+use pulsrs::shape::Shape;
+use pulsrs::stride::Stride;
 
 #[test]
 fn test_stride_construction_from_shape() {
@@ -35,7 +35,7 @@ fn test_stride_offset() {
 
     let stride = Stride::from_shape(&shape);
 
-    assert_eq!(stride.offset(&vec![1, 2, 3]).unwrap_or(0), 33)
+    assert_eq!(stride.offset(&[1, 2, 3]).unwrap_or(0), 33)
 }
 
 #[test]
@@ -57,9 +57,10 @@ fn test_stride_for_offset_error() {
         stride
             .offset(&[1, 2, 3, 4])
             .expect_err("Something went wrong in errors"),
-        PulsrsError::RankMismatch {
+        ShapeError::RankMismatch {
             expected: 3,
             found: 4
         }
+        .into()
     )
 }

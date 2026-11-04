@@ -6,7 +6,10 @@ pub use crate::stride::*;
 
 pub use crate::tensor::Tensor;
 
-pub use crate::error::PulsrsError;
+pub use crate::error::{
+    BadPractices, IteratorError, MappingError, MemoryError, PulsrsError, ShapeError, SlicingError,
+    TensorError,
+};
 
 pub use crate::cursor::Cursor;
 

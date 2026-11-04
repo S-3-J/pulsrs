@@ -1,5 +1,6 @@
+use pulsrs::prelude::*;
 #[allow(unused_imports)]
-use pulsars::{buffer::Buffer, error::PulsrsError, shape::Shape, stride::Stride, tensor::Tensor};
+use pulsrs::{error::PulsrsError, shape::Shape, stride::Stride, tensor::Tensor};
 
 // =============================================================================
 // SCALAR TENSOR TESTS
@@ -21,7 +22,7 @@ fn test_scalar_get_rejects_indices() {
     let result = x.get(&[0]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::TensorIndexingError { shape, indices } => {
+        PulsrsError::TensorErr(TensorError::TensorIndexingError { shape, indices }) => {
             assert!(shape.is_scalar());
             assert_eq!(indices, vec![0]);
         }
@@ -71,7 +72,7 @@ fn test_vector_get_out_of_bounds() {
     let result = x.get(&[3]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::TensorIndexingError { indices, .. } => {
+        PulsrsError::TensorErr(TensorError::TensorIndexingError { indices, .. }) => {
             assert_eq!(indices, vec![3]);
         }
         _ => panic!("Expected TensorIndexingError"),
@@ -85,7 +86,7 @@ fn test_vector_get_wrong_rank() {
     let result = x.get(&[1, 0]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::RankMismatch { expected, found } => {
+        PulsrsError::ShapeErr(ShapeError::RankMismatch { expected, found }) => {
             assert_eq!(expected, 1);
             assert_eq!(found, 2);
         }
@@ -98,10 +99,10 @@ fn test_vector_from_wrong_element_count() {
     let result = Tensor::<i32>::from_vector(vec![1, 2, 3], vec![5]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::ShapeIncompatiblewithElements {
+        PulsrsError::ShapeErr(ShapeError::ShapeIncompatiblewithElements {
             expected,
             permitted,
-        } => {
+        }) => {
             assert_eq!(expected, 3);
             assert_eq!(permitted, 5);
         }
@@ -325,7 +326,7 @@ fn test_reshape_wrong_element_count() {
     let result = x.reshape(vec![3, 3]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::ReshapedElementMismatch { expected, found } => {
+        PulsrsError::TensorErr(TensorError::ReshapedElementMismatch { expected, found }) => {
             assert_eq!(expected, 4);
             assert_eq!(found, 9);
         }
@@ -372,7 +373,7 @@ fn test_permute_axis_out_of_bounds() {
     let result = x.permute(vec![0, 2]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::AxisOutofBounds { max, min: _, found } => {
+        PulsrsError::BadPractices(BadPractices::AxisOutofBounds { max, min: _, found }) => {
             assert_eq!(max, 2);
             assert_eq!(found, 2);
         }
@@ -387,7 +388,7 @@ fn test_permute_duplicate_axis() {
     let result = x.permute(vec![0, 0]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::UniqueDataConstraintError { given } => {
+        PulsrsError::BadPractices(BadPractices::UniqueDataConstraintError { given }) => {
             assert_eq!(given, vec![0, 0]);
         }
         _ => panic!("Expected UniqueDataConstraintError"),
@@ -401,7 +402,7 @@ fn test_permute_wrong_length() {
     let result = x.permute(vec![0]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::RankMismatch { expected, found } => {
+        PulsrsError::ShapeErr(ShapeError::RankMismatch { expected, found }) => {
             assert_eq!(expected, 2);
             assert_eq!(found, 1);
         }
@@ -415,7 +416,7 @@ fn test_permute_scalar_rejects_non_empty() {
     let result = x.permute(vec![0]);
     assert!(result.is_err());
     match result.unwrap_err() {
-        PulsrsError::RankMismatch { expected, found } => {
+        PulsrsError::ShapeErr(ShapeError::RankMismatch { expected, found }) => {
             assert_eq!(expected, 0);
             assert_eq!(found, 1);
         }

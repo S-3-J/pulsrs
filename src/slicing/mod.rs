@@ -1,6 +1,6 @@
 use std::ops::Bound;
 
-use crate::error::PulsrsError;
+use crate::error::{BadPractices, PulsrsError};
 
 pub mod conversions;
 
@@ -27,10 +27,11 @@ impl SliceRange {
 
         // Check if start index is beyond the valid range [0, upper_bound-1]
         if start_idx >= upper_bound {
-            return Err(PulsrsError::IndexOutofBounds {
+            return Err(BadPractices::IndexOutofBounds {
                 max: upper_bound - 1,
                 found: start_idx,
-            });
+            }
+            .into());
         }
 
         // Convert SliceRange bounds to actual end index (inclusive)

@@ -1,5 +1,7 @@
 use std::ops::AddAssign;
 
+use crate::error::ShapeError;
+
 use super::{Buffer, Element, PulsrsError as PE, Rc, Shape, Stride, Tensor};
 
 use rand::{
@@ -15,10 +17,11 @@ impl<T: Element> Tensor<T> {
         let shape = Shape::new(dims);
 
         if shape.numel() != data.len() {
-            return Err(PE::ShapeIncompatiblewithElements {
+            return Err(ShapeError::ShapeIncompatiblewithElements {
                 expected: data.len(),
                 permitted: shape.numel(),
-            });
+            }
+            .into());
         }
 
         let buffer: Buffer<T> = Buffer::from_vec(data);
@@ -103,11 +106,35 @@ impl<T: Element> Tensor<T> {
     {
         let mut data: Vec<T> = Vec::new();
         let mut val = start;
-        data.push(val);
 
         while val < stop {
-            val += step;
             data.push(val);
+            val += step;
+        }
+
+        let shape: Shape = vec![data.len()].into();
+        let stride = Stride::from_shape(&shape);
+
+        Tensor {
+            buffer: Rc::new(Buffer::from_vec(data)),
+            shape,
+            stride,
+            offset: 0,
+            contiguous: true,
+            dtype: T::dtype(),
+        }
+    }
+
+    pub fn rev_arange(start: T, stop: T, step: T) -> Self
+    where
+        T: PartialOrd + AddAssign,
+    {
+        let mut data: Vec<T> = Vec::new();
+        let mut val = start;
+
+        while val > stop {
+            data.push(val);
+            val += step;
         }
 
         let shape: Shape = vec![data.len()].into();
