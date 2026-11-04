@@ -69,8 +69,7 @@ impl Shape {
             return false;
         }
 
-        for (i, j) in index.iter().zip(self.dims.iter()) 
-        {
+        for (i, j) in index.iter().zip(self.dims.iter()) {
             if *i >= *j {
                 return false;
             }

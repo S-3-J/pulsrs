@@ -1,23 +1,19 @@
-
 /*
-    Buffer as the name suggests, is the buffer that holds raw data. 
+    Buffer as the name suggests, is the buffer that holds raw data.
     It is a contiguous 1-D vector of data and is not committed to a shape.
 */
 
-use std::ops::{Index, IndexMut};
 use super::Buffer;
+use std::ops::{Index, IndexMut};
 
-impl<T> Buffer<T>{
-    
+impl<T> Buffer<T> {
     pub fn new() -> Self {
-        Self {
-            data : Vec::new(),
-        }
+        Self { data: Vec::new() }
     }
 
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
-            data : Vec::with_capacity(capacity),
+            data: Vec::with_capacity(capacity),
         }
     }
 

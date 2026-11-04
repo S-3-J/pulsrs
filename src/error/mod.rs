@@ -1,9 +1,8 @@
-
 pub mod error_methods;
 use super::shape::Shape;
 
 #[derive(Debug, PartialEq)]
-pub enum PulsrsError{
+pub enum PulsrsError {
     // universal errors
     RankMismatch {
         expected: usize,

@@ -1,6 +1,4 @@
-
 use crate::{dtype::Element, shape::Shape, stride::Stride, tensor::Tensor};
-
 
 impl<T: Element> Tensor<T> {
     pub fn broadcast(&self, shape: &[usize]) -> Self {
@@ -33,8 +31,7 @@ impl<T: Element> Tensor<T> {
         }
     }
 
-    pub fn is_broadcastible_for(&self, other_shape: &[usize]) -> (bool, Vec<usize>)
-    {
+    pub fn is_broadcastible_for(&self, other_shape: &[usize]) -> (bool, Vec<usize>) {
         let this_shape = self.shape().dims();
 
         let mut final_shape = Vec::with_capacity(this_shape.len().max(other_shape.len()));
@@ -44,14 +41,12 @@ impl<T: Element> Tensor<T> {
 
         loop {
             match (this.next(), other.next()) {
-                (Some(&i), Some(&j)) => {
-                    match (i, j) {
-                        (i, j) if i == j => final_shape.push(i),
-                        (1, j) => final_shape.push(j),
-                        (i, 1) => final_shape.push(i),
-                        _ => return (false, vec![]),
-                    }
-                }
+                (Some(&i), Some(&j)) => match (i, j) {
+                    (i, j) if i == j => final_shape.push(i),
+                    (1, j) => final_shape.push(j),
+                    (i, 1) => final_shape.push(i),
+                    _ => return (false, vec![]),
+                },
 
                 (Some(&i), None) => final_shape.push(i),
                 (None, Some(&j)) => final_shape.push(j),
@@ -65,18 +60,18 @@ impl<T: Element> Tensor<T> {
     }
 
     /*
-    pub fn try_broadcast(&self, other_shape: &[usize]) -> Result<Self, PulsrsError> {
-        let (safe, new_shape) = self.is_broadcastible_for(other_shape);
-        
-        if safe {
-            Ok(
-                self.broadcast(other_shape)
-            )
-        } else {
-            Err(
-                
-            )
+        pub fn try_broadcast(&self, other_shape: &[usize]) -> Result<Self, PulsrsError> {
+            let (safe, new_shape) = self.is_broadcastible_for(other_shape);
+
+            if safe {
+                Ok(
+                    self.broadcast(other_shape)
+                )
+            } else {
+                Err(
+
+                )
+            }
         }
-    }
-*/
+    */
 }

@@ -1,13 +1,15 @@
-
-use super::{IndexCursor, Cursor};
+use super::{Cursor, IndexCursor};
 
 impl IndexCursor {
     pub fn new(dims: Vec<usize>, priority: Vec<usize>) -> Self {
         let d_len = dims.len();
-        assert!(d_len == priority.len(), "Index Cursor got mismatching dimensions and priorities");
-        
+        assert!(
+            d_len == priority.len(),
+            "Index Cursor got mismatching dimensions and priorities"
+        );
+
         let filled = dims.iter().product::<usize>() > 0;
-        
+
         Self {
             dims,
             current_index: vec![0; d_len],
@@ -18,8 +20,7 @@ impl IndexCursor {
     }
 
     pub fn contiguous_style(&self) -> bool {
-        self.priority.windows(2)
-            .all(|w| w[0] > w[1])
+        self.priority.windows(2).all(|w| w[0] > w[1])
     }
 }
 
@@ -27,7 +28,6 @@ impl Cursor for IndexCursor {
     type Output = Vec<usize>;
 
     fn advance(&mut self) {
-
         if self.dims.is_empty() {
             self.overflow = true;
         } else {
@@ -36,12 +36,11 @@ impl Cursor for IndexCursor {
                 if self.current_index[dim] + 1 < self.dims[dim] {
                     self.current_index[dim] += 1;
                     self.overflow = false;
-                    break
-                } 
+                    break;
+                }
                 self.current_index[dim] = 0;
             }
         }
-
     }
 
     fn current(&self) -> Self::Output {
@@ -53,12 +52,11 @@ impl Cursor for IndexCursor {
         self.overflow = false;
     }
 
-    fn finished(&self) -> bool{
+    fn finished(&self) -> bool {
         self.overflow
     }
 
     fn has_elements(&self) -> bool {
         self.filled
     }
-
 }

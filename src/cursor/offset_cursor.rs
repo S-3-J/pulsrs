@@ -2,7 +2,12 @@ use super::{Cursor, OffsetCursor};
 
 // special fast cursor just for contiguous tensors
 impl<'a> OffsetCursor<'a> {
-    pub fn new(dims: &'a [usize], strides: &'a [isize], priority: Vec<usize>, offset: isize) -> Self {
+    pub fn new(
+        dims: &'a [usize],
+        strides: &'a [isize],
+        priority: Vec<usize>,
+        offset: isize,
+    ) -> Self {
         let filled = dims.iter().product::<usize>() != 0usize;
 
         Self {

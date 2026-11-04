@@ -1,4 +1,4 @@
-use std::{ops::Bound};
+use std::ops::Bound;
 
 use crate::error::PulsrsError;
 
@@ -13,7 +13,11 @@ pub struct SliceRange {
 }
 
 impl SliceRange {
-    pub fn resolve(self, lower_bound: usize, upper_bound: usize) -> Result<(usize, usize, isize, bool), PulsrsError> {
+    pub fn resolve(
+        self,
+        lower_bound: usize,
+        upper_bound: usize,
+    ) -> Result<(usize, usize, isize, bool), PulsrsError> {
         // Calculate the actual start index (inclusive)
         let start_idx = match self.start {
             Bound::Unbounded => lower_bound,
@@ -33,7 +37,13 @@ impl SliceRange {
         let end_index_inclusive = match self.end {
             Bound::Unbounded => upper_bound - 1,
             Bound::Included(s) => s,
-            Bound::Excluded(s) => if s == 0 { 0 } else { s - 1 },
+            Bound::Excluded(s) => {
+                if s == 0 {
+                    0
+                } else {
+                    s - 1
+                }
+            }
         };
 
         // Clamp end index to valid range [0, upper_bound-1]

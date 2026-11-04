@@ -1,8 +1,5 @@
-
-use std::{
-    ops::{Add, Div, Mul, Rem, Sub}
-};
-use crate::{tensor::Tensor};
+use crate::tensor::Tensor;
+use std::ops::{Add, Div, Mul, Rem, Sub};
 
 macro_rules! impl_scalar_operations {
     ($($t:ty),*) => {
@@ -18,7 +15,7 @@ macro_rules! impl_scalar_operations {
 
             impl<'a> Sub<$t> for &'a Tensor<$t>
             {
-                type Output = Tensor<$t>; 
+                type Output = Tensor<$t>;
 
                 fn sub(self, rhs: $t) -> Self::Output {
                     self.unary_map(rhs, |a, b| a - b)
@@ -50,7 +47,7 @@ macro_rules! impl_scalar_operations {
                 fn rem(self, rhs: $t) -> Self::Output {
                     self.unary_map(rhs, |a, b| a % b)
                 }
-            }       
+            }
         )*
     };
 }

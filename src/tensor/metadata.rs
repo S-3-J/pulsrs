@@ -1,7 +1,6 @@
-
 use crate::dtype::{DType, Element};
 
-use super::{Tensor, Shape};
+use super::{Shape, Tensor};
 
 impl<T: Element> Tensor<T> {
     // calculate rank

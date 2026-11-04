@@ -1,22 +1,18 @@
-use std::{collections::HashSet, fmt::{Debug}, iter::zip};
+use std::{collections::HashSet, fmt::Debug, iter::zip};
 
 use crate::{
-    dtype::Element, error::PulsrsError, iterator::iteration_style::IterStyle, shape::Shape
+    dtype::Element, error::PulsrsError, iterator::iteration_style::IterStyle, shape::Shape,
 };
 
 use super::Tensor;
 
 impl<T: Element> Tensor<T> {
-
     // a function applyer
-    pub fn function_map<F, K>(
-        &self,
-        ops: F,
-    ) -> Tensor<K>
-    where 
+    pub fn function_map<F, K>(&self, ops: F) -> Tensor<K>
+    where
         T: Copy + Debug,
         F: Fn(T) -> K,
-        K: Element
+        K: Element,
     {
         let mut buffer: Vec<K> = Vec::with_capacity(self.numel());
         let mut elements = self.tensor_iterator(IterStyle::Cstyle);
@@ -27,17 +23,13 @@ impl<T: Element> Tensor<T> {
 
         Tensor::from_vector(buffer, self.shape().dims().to_vec()).unwrap()
     }
-    
+
     // a binary function with a constant like, f(a, b) for all a that belong to tensor T and b is a constant.
-    pub fn unary_map<F, K>(
-        &self,
-        other: T,
-        ops: F,
-    ) -> Tensor<K>
-    where 
+    pub fn unary_map<F, K>(&self, other: T, ops: F) -> Tensor<K>
+    where
         T: Copy + Debug,
-        F: Fn(T,T) -> K,
-        K: Element
+        F: Fn(T, T) -> K,
+        K: Element,
     {
         let mut buffer: Vec<K> = Vec::with_capacity(self.numel());
         let mut elements = self.tensor_iterator(IterStyle::Cstyle);
@@ -50,17 +42,12 @@ impl<T: Element> Tensor<T> {
     }
 
     // maps a binary operation, where operands are two corresponding elements from different tensors.
-    pub fn elementwise_map<F, K>(
-        &self,
-        other: &Self,
-        ops: F,
-    ) -> Tensor<K>
+    pub fn elementwise_map<F, K>(&self, other: &Self, ops: F) -> Tensor<K>
     where
         T: Copy + Debug,
         F: Fn(T, T) -> K,
-        K: Element
+        K: Element,
     {
-
         if self.shape() != other.shape() {
             panic!("Tensor operation error: Incompatible shapes!.")
         }
@@ -76,25 +63,18 @@ impl<T: Element> Tensor<T> {
         Tensor::from_vector(buffer, self.shape().dims().to_vec()).unwrap()
     }
 
-    pub fn try_elementwise_map<F, K>(
-        &self,
-        other: &Self,
-        ops: F,
-    ) -> Result<Tensor<K>, PulsrsError>
+    pub fn try_elementwise_map<F, K>(&self, other: &Self, ops: F) -> Result<Tensor<K>, PulsrsError>
     where
         T: Copy + Debug,
         F: Fn(T, T) -> K,
-        K: Element
+        K: Element,
     {
-
         if self.shape() != other.shape() {
-            return Err(
-                PulsrsError::BinaryMappingError {
-                    shape1: self.shape().clone(), 
-                    shape2: other.shape().clone(), 
-                    message: "Incompatible shapes.".to_string() 
-                }
-            )
+            return Err(PulsrsError::BinaryMappingError {
+                shape1: self.shape().clone(),
+                shape2: other.shape().clone(),
+                message: "Incompatible shapes.".to_string(),
+            });
         }
 
         let mut buffer: Vec<K> = Vec::with_capacity(self.numel());
@@ -108,14 +88,10 @@ impl<T: Element> Tensor<T> {
         Tensor::from_vector(buffer, self.shape().dims().to_vec())
     }
 
-    pub fn reduce<F>(
-        &self,
-        axes: &[usize],
-        ops: F,
-    ) -> Self
-    where 
+    pub fn reduce<F>(&self, axes: &[usize], ops: F) -> Self
+    where
         T: Copy + Debug,
-        F: Fn(T, T) -> T
+        F: Fn(T, T) -> T,
     {
         if self.is_scalar() {
             self.clone()
@@ -148,7 +124,7 @@ impl<T: Element> Tensor<T> {
             let mut buffer: Vec<T> = Vec::with_capacity(new_shape.numel());
 
             let mut reduction_priority: Vec<usize> = Vec::with_capacity(self.ndim());
-            
+
             for axis in &axes {
                 reduction_priority.push(*axis);
             }
@@ -164,21 +140,20 @@ impl<T: Element> Tensor<T> {
 
             for _i in 0..new_shape.numel() {
                 let Some(mut acc) = offsetter.next() else {
-                    break
+                    break;
                 };
 
                 for _j in 1..reduction_width {
                     let Some(e) = offsetter.next() else {
                         std::panic!(
                             "TensorIterator returned None. This is not intended behaviour.\nReturned None at element: {}, step: {}. Total steps required: {}",
-                            _i, _j , reduction_width
+                            _i,
+                            _j,
+                            reduction_width
                         )
                     };
 
-                    acc = ops(
-                        acc,
-                        e
-                    );
+                    acc = ops(acc, e);
                 }
 
                 buffer.push(acc);
@@ -188,14 +163,10 @@ impl<T: Element> Tensor<T> {
         }
     }
 
-    pub fn try_reduce<F>(
-        &self,
-        axes: &[usize],
-        ops: F,
-    ) -> Result<Self, PulsrsError>
-    where 
+    pub fn try_reduce<F>(&self, axes: &[usize], ops: F) -> Result<Self, PulsrsError>
+    where
         T: Copy + Debug,
-        F: Fn(T, T) -> T
+        F: Fn(T, T) -> T,
     {
         if self.is_scalar() {
             Ok(self.clone())
@@ -204,18 +175,18 @@ impl<T: Element> Tensor<T> {
 
             for &axis in axes.iter() {
                 if axis >= self.ndim() {
-                    return Err(
-                        PulsrsError::AxisOutofBounds { max: self.ndim(), min: 0, found: axis }
-                    );
+                    return Err(PulsrsError::AxisOutofBounds {
+                        max: self.ndim(),
+                        min: 0,
+                        found: axis,
+                    });
                 }
             }
 
             let mut member = HashSet::new();
 
             if !axes.iter().all(|a| member.insert(*a)) {
-                return Err(
-                    PulsrsError::UniqueDataConstraintError { given: axes }
-                );
+                return Err(PulsrsError::UniqueDataConstraintError { given: axes });
             }
 
             axes.sort_unstable();
@@ -232,7 +203,7 @@ impl<T: Element> Tensor<T> {
             let mut buffer: Vec<T> = Vec::with_capacity(new_shape.numel());
 
             let mut reduction_priority: Vec<usize> = Vec::with_capacity(self.ndim());
-            
+
             for axis in &axes {
                 reduction_priority.push(*axis);
             }
@@ -248,21 +219,20 @@ impl<T: Element> Tensor<T> {
 
             for _i in 0..new_shape.numel() {
                 let Some(mut acc) = offsetter.next() else {
-                    break
+                    break;
                 };
 
                 for _j in 1..reduction_width {
                     let Some(e) = offsetter.next() else {
                         std::panic!(
                             "TensorIterator returned None. This is not intended behaviour.\nReturned None at element: {}, step: {}. Total steps required: {}",
-                            _i, _j , reduction_width
+                            _i,
+                            _j,
+                            reduction_width
                         )
                     };
 
-                    acc = ops(
-                        acc,
-                        e
-                    );
+                    acc = ops(acc, e);
                 }
 
                 buffer.push(acc);
@@ -272,5 +242,3 @@ impl<T: Element> Tensor<T> {
         }
     }
 }
-
-

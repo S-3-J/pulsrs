@@ -1,20 +1,18 @@
-
 pub mod index_cursor;
 pub mod offset_cursor;
 
-pub trait Cursor{
+pub trait Cursor {
     type Output;
 
     fn advance(&mut self);
 
     fn reset(&mut self);
-    
+
     fn finished(&self) -> bool;
-    
+
     fn has_elements(&self) -> bool;
 
     fn current(&self) -> Self::Output;
-
 }
 
 pub struct IndexCursor {

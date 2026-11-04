@@ -1,35 +1,34 @@
-
-use std::{fmt::Debug};
 use crate::cursor::OffsetCursor;
 use crate::dtype::Element;
-use crate::iterator::iterator_backend::IteratorBackend;
-use crate::{cursor::{Cursor}, tensor::Tensor};
 use crate::iterator::iteration_style::IterStyle;
+use crate::iterator::iterator_backend::IteratorBackend;
+use crate::{cursor::Cursor, tensor::Tensor};
+use std::fmt::Debug;
 
 use super::TensorIterator;
 
 impl<'a, T> TensorIterator<'a, T>
 where
-    T: 'a + Element
+    T: 'a + Element,
 {
-    pub fn new(tensor: &'a Tensor<T>, priority: IterStyle) -> Self 
-    {
+    pub fn new(tensor: &'a Tensor<T>, priority: IterStyle) -> Self {
         let backend = match tensor.is_contiguous() && matches!(priority, IterStyle::Cstyle) {
-            true => {
-                IteratorBackend::Offset { start: 0, end: tensor.numel() }
+            true => IteratorBackend::Offset {
+                start: 0,
+                end: tensor.numel(),
             },
             // defaults to strided offset
-            false => {
-                IteratorBackend::StridedOffset {
-                    offsetter: OffsetCursor::new(tensor.shape().dims(), tensor.strides(), priority.process(tensor.ndim()), tensor.offset() as isize)
-                }
-            }
+            false => IteratorBackend::StridedOffset {
+                offsetter: OffsetCursor::new(
+                    tensor.shape().dims(),
+                    tensor.strides(),
+                    priority.process(tensor.ndim()),
+                    tensor.offset() as isize,
+                ),
+            },
         };
 
-        Self {
-            tensor,
-            backend
-        }
+        Self { tensor, backend }
     }
 
     pub fn backend(&self) -> &IteratorBackend<'a> {
@@ -37,15 +36,13 @@ where
     }
 }
 
-
 impl<'a, T> Iterator for TensorIterator<'a, T>
 where
-    T: 'a + Copy + Debug + Element
+    T: 'a + Copy + Debug + Element,
 {
     type Item = T;
-    
-    fn next(&mut self) -> Option<Self::Item> {
 
+    fn next(&mut self) -> Option<Self::Item> {
         match &self.backend {
             IteratorBackend::Offset { start, end } => {
                 if start == end {
@@ -55,7 +52,7 @@ where
                     self.backend.advance();
                     Some(e)
                 }
-            },
+            }
 
             // older slow indexing via stride calculation
             IteratorBackend::Indexed { indexer } => {
@@ -68,7 +65,7 @@ where
 
                     Some(e)
                 }
-            },
+            }
 
             IteratorBackend::StridedOffset { offsetter } => {
                 if !offsetter.has_elements() || offsetter.finished() {
@@ -82,6 +79,5 @@ where
                 }
             }
         }
-        
     }
 }
