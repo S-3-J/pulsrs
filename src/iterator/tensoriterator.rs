@@ -48,7 +48,7 @@ where
                 if start == end {
                     None
                 } else {
-                    let e = self.tensor.get_from_offset(*start).unwrap();
+                    let e = self.tensor.get_from_offset(*start, true).unwrap();
                     self.backend.advance();
                     Some(e)
                 }
@@ -72,7 +72,7 @@ where
                     None
                 } else {
                     let offset = offsetter.current();
-                    let e = self.tensor.get_from_offset(offset).unwrap();
+                    let e = self.tensor.get_from_offset(offset, true).unwrap();
                     self.backend.advance();
 
                     Some(e)

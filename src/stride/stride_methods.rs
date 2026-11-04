@@ -5,7 +5,7 @@
 */
 
 use super::Stride;
-use crate::error::PulsrsError;
+use crate::error::{PulsrsError, ShapeError};
 use crate::shape::Shape;
 
 impl Stride {
@@ -48,10 +48,11 @@ impl Stride {
 
     pub fn offset(&self, indices: &[usize]) -> Result<isize, PulsrsError> {
         if indices.len() != self.ndim() {
-            return Err(PulsrsError::RankMismatch {
+            return Err(ShapeError::RankMismatch {
                 expected: self.ndim(),
                 found: indices.len(),
-            });
+            }
+            .into());
         }
 
         let mut final_offset: isize = 0;

@@ -1,24 +1,29 @@
+pub mod bad_practices;
 pub mod error_methods;
+pub mod kernel_error;
+pub mod mapping_err;
+pub mod memory_err;
+pub mod shape_err;
+pub mod tensor_err;
+
+use crate::dtype::DType;
+
 use super::shape::Shape;
 
 #[derive(Debug, PartialEq)]
 pub enum PulsrsError {
-    // universal errors
-    RankMismatch {
-        expected: usize,
-        found: usize,
-    },
+    BadPractices(BadPractices),
+    ShapeErr(ShapeError),
+    TensorErr(TensorError),
+    MemErr(MemoryError),
+    //IterErr(IteratorError),
+    //SlicingErr(SlicingError),
+    MappingErr(MappingError),
+    KernelErr(KernelError),
+}
 
-    ReshapedElementMismatch {
-        expected: usize,
-        found: usize,
-    },
-
-    ShapeIncompatiblewithElements {
-        expected: usize,
-        permitted: usize,
-    },
-
+#[derive(Debug, PartialEq)]
+pub enum BadPractices {
     UniqueDataConstraintError {
         given: Vec<usize>,
     },
@@ -33,21 +38,47 @@ pub enum PulsrsError {
         max: usize,
         found: usize,
     },
+}
 
-    //tensor errors
-    TensorIndexingError {
-        shape: Shape,
-        indices: Vec<usize>,
-    },
+#[derive(Debug, PartialEq)]
+pub enum ShapeError {
+    RankMismatch { expected: usize, found: usize },
 
-    NonContiguousMemoryError {
-        function_path: &'static str,
-    },
+    ShapeIncompatiblewithElements { expected: usize, permitted: usize },
+}
 
-    // mapping errors
+#[derive(Debug, PartialEq)]
+pub enum TensorError {
+    ReshapedElementMismatch { expected: usize, found: usize },
+
+    TensorIndexingError { shape: Shape, indices: Vec<usize> },
+
+    UncompatibleBroadcast { from: Shape, to: Shape },
+}
+
+#[derive(Debug, PartialEq)]
+pub enum MappingError {
     BinaryMappingError {
         shape1: Shape,
         shape2: Shape,
         message: String,
     },
+}
+
+#[derive(Debug, PartialEq)]
+pub enum IteratorError {}
+
+#[derive(Debug, PartialEq)]
+pub enum SlicingError {}
+
+#[derive(Debug, PartialEq)]
+pub enum MemoryError {
+    NonContiguousMemoryError { function_path: &'static str },
+}
+
+#[derive(Debug, PartialEq)]
+pub enum KernelError {
+    SIMDIncompatibleDType { dtype: DType },
+
+    SIMDOpUncompabtibleDType { dtype: DType, operation: String },
 }

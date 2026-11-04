@@ -1,10 +1,17 @@
-use crate::dtype::Element;
+use std::fmt::Debug;
+
+use crate::{
+    dtype::Element,
+    error::{MemoryError, PulsrsError},
+    function_signature,
+    iterator::iteration_style::IterStyle::Cstyle,
+};
 
 use super::{Buffer, Rc, Stride, Tensor};
 
 impl<T: Element> Tensor<T>
 where
-    T: Copy + Default,
+    T: Copy + Default + Debug,
 {
     pub fn contiguous(&self) -> Self {
         if self.is_scalar() {
@@ -14,46 +21,15 @@ where
         if self.is_contiguous() {
             self.clone()
         } else {
-            let mut contiguous_buffer: Vec<T> = vec![T::default(); self.numel()];
-            let dims = self.shape().dims();
+            let mut contiguous_buffer: Vec<T> = Vec::with_capacity(self.shape().numel());
 
             let new_stride = Stride::from_shape(&self.shape);
 
-            let mut index: Vec<usize> = vec![0; dims.len()];
+            let tensor_iterator = self.tensor_iterator(Cstyle);
 
-            fn n_dim_iterator<T>(
-                t: &Tensor<T>,
-                dims: &[usize],
-                depth: usize,
-                index: &mut Vec<usize>,
-                new_buffer: &mut Vec<T>,
-                new_stride: &Stride,
-            ) where
-                T: Copy + Default + Element,
-            {
-                for i in 0..dims[depth] {
-                    index[depth] = i;
-                    if depth + 1 == dims.len() {
-                        // should panic and crash if erroneous;
-                        //however its not possible to crash here as the tensor won't index out of bounds.
-                        let val = t.get(index).unwrap();
-                        let new_offset = new_stride.offset(index).unwrap() as usize;
-
-                        new_buffer[new_offset] = val;
-                    } else {
-                        n_dim_iterator(t, dims, depth + 1, index, new_buffer, new_stride);
-                    }
-                }
+            for x in tensor_iterator {
+                contiguous_buffer.push(x);
             }
-
-            n_dim_iterator(
-                self,
-                dims,
-                0,
-                &mut index,
-                &mut contiguous_buffer,
-                &new_stride,
-            );
 
             Tensor {
                 buffer: Rc::new(Buffer::from_vec(contiguous_buffer)),
@@ -63,6 +39,19 @@ where
                 contiguous: true,
                 dtype: self.dtype(),
             }
+        }
+    }
+
+    pub fn buffer_as_slice(&self) -> Result<&[T], PulsrsError> {
+        if !self.is_contiguous() {
+            Err(MemoryError::NonContiguousMemoryError {
+                function_path: function_signature!(),
+            }
+            .into())
+        } else {
+            let final_offset = self.offset + self.numel();
+            let buffer = &self.buffer.as_slice()[self.offset..final_offset];
+            Ok(buffer)
         }
     }
 }

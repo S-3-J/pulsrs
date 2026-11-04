@@ -2,7 +2,11 @@
 use std::rc::Rc;
 
 use crate::{
-    dtype::Element, error::PulsrsError as PE, shape::Shape, slicing::SliceRange, stride::Stride,
+    dtype::Element,
+    error::{PulsrsError as PE, ShapeError},
+    shape::Shape,
+    slicing::SliceRange,
+    stride::Stride,
     tensor::Tensor,
 };
 
@@ -13,10 +17,11 @@ impl<T: Element> Tensor<T> {
         let not_none_axes = ranges.iter().filter(|r| r.is_some()).count();
 
         if dims.len() != not_none_axes {
-            return Err(PE::RankMismatch {
+            return Err(ShapeError::RankMismatch {
                 expected: dims.len(),
                 found: not_none_axes,
-            });
+            }
+            .into());
         }
 
         let mut i = 0usize;

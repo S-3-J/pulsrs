@@ -53,7 +53,7 @@ where
             write!(
                 f,
                 "[{}], dtype: {}",
-                self.get_from_offset(0).unwrap(),
+                self.get_from_offset(0, false).unwrap(),
                 self.dtype().name()
             )?;
             Ok(())
