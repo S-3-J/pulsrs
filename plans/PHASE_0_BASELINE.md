@@ -1,6 +1,6 @@
 # Phase 0 Baseline
 
-Status: **baseline checks pass; worktree classification remains open**
+Status: **baseline checks pass; grouped commit sequence is complete locally**
 
 Last verified: **2026-11-04**
 
@@ -87,13 +87,13 @@ The current implementation provides:
 - [x] Planning files are trackable and indexed.
 - [x] Provisional benchmark measurements are recorded.
 - [x] Current behavior and unresolved tensor contract decisions are documented.
-- [ ] Current worktree changes are classified into accepted baseline, follow-up, or discarded work.
+- [x] Current worktree changes are classified into accepted baseline, follow-up, or discarded work.
 - [ ] Tensor-core semantic contract is reviewed and accepted.
 - [ ] Baseline benchmark workloads and recorded numbers are accepted as regression references.
 
 ## Commit eligibility assessment
 
-The current batch is **not eligible as a single clean-start commit** described as “basic vectorizable setup + baseline error refinement.” It also contains broad tensor behavior changes, public API changes, package metadata changes, examples, tests, benchmarks, CI, and planning files.
+The current batch was **not eligible as a single clean-start commit** described as “basic vectorizable setup + baseline error refinement.” It also contained broad tensor behavior changes, public API changes, package metadata changes, examples, tests, benchmarks, CI, and planning files. It has now been split into the ordered local commits recorded in `WORKTREE_CLASSIFICATION.md`.
 
 The recommended clean start is to split it into:
 
@@ -108,15 +108,15 @@ The local branch structure for this split is now:
 
 ```text
 master
-├── phase-0-tooling-context
-├── vectorizable-setup
-├── error-refinement
-├── tensor-core-integration
-└── benchmarks-examples
+└── phase-0-tooling-context
+    └── vectorizable-setup
+        └── error-refinement
+            └── tensor-core-integration
+                └── benchmarks-examples
 ```
 
-All five branches currently point at `master`. The dirty worktree still needs to be selectively staged onto them.
+The grouped branches have been selectively staged, committed, and validated locally. The current worktree is clean on `benchmarks-examples`.
 
 ## Next action
 
-Complete the worktree classification before starting Phase 1. Do not interpret the passing checks as proof that tensor semantics, memory use, or performance are already correct.
+Push the ordered branches only after reviewing the public API breaks and opening the corresponding issues/PRs. Do not interpret the passing checks as proof that tensor semantics, memory use, or performance are already correct.
