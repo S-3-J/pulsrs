@@ -30,7 +30,7 @@ fn test_buffer_length_and_capacity() {
 fn test_buffer_isempty_when_empty() {
     let buffer: Buffer<i16> = Buffer::with_capacity(5);
 
-    assert_eq!(buffer.is_empty(), true)
+    assert!(buffer.is_empty())
 }
 
 #[test]
@@ -38,7 +38,7 @@ fn test_buffer_isempty_when_not_empty() {
     let mut buffer: Buffer<i16> = Buffer::new();
     buffer.push(1);
 
-    assert_eq!(buffer.is_empty(), false)
+    assert!(!buffer.is_empty())
 }
 
 #[test]

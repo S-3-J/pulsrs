@@ -1,4 +1,7 @@
+#[doc(hidden)]
 pub mod index_cursor;
+
+#[doc(hidden)]
 pub mod offset_cursor;
 
 pub trait Cursor {
@@ -29,6 +32,7 @@ pub struct OffsetCursor<'a> {
     priority: Vec<usize>,
     current_index: Vec<usize>,
     offset: isize,
+    absolute_offset: isize,
     overflow: bool,
     filled: bool,
 }
