@@ -1,4 +1,4 @@
-use pulsrs::buffer::Buffer;
+use pulsars::buffer::Buffer;
 
 #[test]
 fn test_buffer_construction() {
