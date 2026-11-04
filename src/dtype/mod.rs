@@ -22,7 +22,7 @@ pub enum DType {
     Uint128,
 
     //boolean
-    Bool
+    Bool,
 }
 
 #[allow(non_upper_case_globals)]

@@ -9,6 +9,7 @@ use crate::{
 use std::rc::Rc;
 
 pub mod binary_operations;
+pub mod broadcast;
 pub mod constructors;
 pub mod contiguous;
 pub mod display;
@@ -19,9 +20,8 @@ pub mod metadata;
 pub mod permutation;
 pub mod reduce_operations;
 pub mod reshape;
-pub mod unary_operations;
 pub mod slicing;
-pub mod broadcast;
+pub mod unary_operations;
 
 #[derive(Clone, Debug)]
 pub struct Tensor<T: Element> {

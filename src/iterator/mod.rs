@@ -1,19 +1,18 @@
-
+use crate::{cursor::IndexCursor, tensor::Tensor};
 use crate::{dtype::Element, iterator::iterator_backend::IteratorBackend};
-use crate::{tensor::Tensor, cursor::IndexCursor};
 
 pub mod indexiterator;
-pub mod tensoriterator;
 pub mod iteration_style;
 pub mod iterator_backend;
+pub mod tensoriterator;
 
 pub struct IndexIterator {
-    cursor: IndexCursor
+    cursor: IndexCursor,
 }
 
 pub struct TensorIterator<'a, T>
 where
-    T: 'a + Element
+    T: 'a + Element,
 {
     tensor: &'a Tensor<T>,
     backend: IteratorBackend<'a>,

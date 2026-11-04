@@ -22,16 +22,13 @@ fn main() {
 
     println!("Original:\n{}\n", t);
 
-
     // ============================================================
     // TEST 1: Reverse innermost dimension
     // ============================================================
 
-    let t1 = t.slice(vec![
-        (..).iosr(),
-        (..).iosr(),
-        (.., -1).iosr(),
-    ]).expect("test 1 failed");
+    let t1 = t
+        .slice(vec![(..).iosr(), (..).iosr(), (.., -1).iosr()])
+        .expect("test 1 failed");
 
     println!("TEST 1 - Reverse last axis:");
     println!("{}", t1);
@@ -49,16 +46,13 @@ fn main() {
     //   ]
     // ]
 
-
     // ============================================================
     // TEST 2: Reverse middle + last dimensions
     // ============================================================
 
-    let t2 = t.slice(vec![
-        (..).iosr(),
-        (.., -1).iosr(),
-        (.., -1).iosr(),
-    ]).expect("test 2 failed");
+    let t2 = t
+        .slice(vec![(..).iosr(), (.., -1).iosr(), (.., -1).iosr()])
+        .expect("test 2 failed");
 
     println!("TEST 2 - Reverse axes 1 and 2:");
     println!("{}", t2);
@@ -76,16 +70,13 @@ fn main() {
     //   ]
     // ]
 
-
     // ============================================================
     // TEST 3: Reverse first dimension
     // ============================================================
 
-    let t3 = t.slice(vec![
-        (.., -1).iosr(),
-        (..).iosr(),
-        (..).iosr(),
-    ]).expect("test 3 failed");
+    let t3 = t
+        .slice(vec![(.., -1).iosr(), (..).iosr(), (..).iosr()])
+        .expect("test 3 failed");
 
     println!("TEST 3 - Reverse first axis:");
     println!("{}", t3);
@@ -103,16 +94,13 @@ fn main() {
     //   ]
     // ]
 
-
     // ============================================================
     // TEST 4: Reverse ALL dimensions
     // ============================================================
 
-    let t4 = t.slice(vec![
-        (.., -1).iosr(),
-        (.., -1).iosr(),
-        (.., -1).iosr(),
-    ]).expect("test 4 failed");
+    let t4 = t
+        .slice(vec![(.., -1).iosr(), (.., -1).iosr(), (.., -1).iosr()])
+        .expect("test 4 failed");
 
     println!("TEST 4 - Reverse all axes:");
     println!("{}", t4);
@@ -130,16 +118,13 @@ fn main() {
     //   ]
     // ]
 
-
     // ============================================================
     // TEST 5: Positive + negative strides together
     // ============================================================
 
-    let t5 = t.slice(vec![
-        (..).iosr(),
-        (..).iosr(),
-        (1..4, -1).iosr(),
-    ]).expect("test 5 failed");
+    let t5 = t
+        .slice(vec![(..).iosr(), (..).iosr(), (1..4, -1).iosr()])
+        .expect("test 5 failed");
 
     println!("TEST 5 - Partial reverse:");
     println!("{}", t5);
@@ -157,34 +142,27 @@ fn main() {
     //   ]
     // ]
 
-
     // ============================================================
     // TEST 6: Step magnitude > 1
     // ============================================================
 
-    let t6 = t.slice(vec![
-        (..).iosr(),
-        (..).iosr(),
-        (.., -2).iosr(),
-    ]).expect("test 6 failed");
+    let t6 = t
+        .slice(vec![(..).iosr(), (..).iosr(), (.., -2).iosr()])
+        .expect("test 6 failed");
 
     println!("TEST 6 - Reverse with step -2:");
     println!("{}", t6);
-
 
     // ============================================================
     // TEST 7: Negative stride on two dimensions + step -2
     // ============================================================
 
-    let t7 = t.slice(vec![
-        (.., -1).iosr(),
-        (.., -1).iosr(),
-        (.., -2).iosr(),
-    ]).expect("test 7 failed");
+    let t7 = t
+        .slice(vec![(.., -1).iosr(), (.., -1).iosr(), (.., -2).iosr()])
+        .expect("test 7 failed");
 
     println!("TEST 7 - Multiple negative strides:");
     println!("{}", t7);
-
 
     // ============================================================
     // TEST 8: Verify indexing directly

@@ -61,8 +61,8 @@ impl<T: Element + Copy> Tensor<T> {
                 indices: vec![offset],
             })
         } else {
-            Ok(self.buffer[self.offset+offset])
-        }        
+            Ok(self.buffer[self.offset + offset])
+        }
     }
 }
 

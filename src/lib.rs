@@ -3,12 +3,12 @@ pub mod cursor;
 pub mod dtype;
 pub mod error;
 pub mod iterator;
-pub mod shape;
-pub mod stride;
-pub mod tensor;
 pub mod prelude;
 pub mod random;
+pub mod shape;
 pub mod slicing;
+pub mod stride;
+pub mod tensor;
 
 // function signature helper
 #[macro_export]

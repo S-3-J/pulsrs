@@ -1,6 +1,6 @@
 use super::SliceRange;
 use std::ops::{
-    Bound, Range, RangeBounds, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive
+    Bound, Range, RangeBounds, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
 };
 
 pub trait IntoOptSliceRange {
@@ -50,7 +50,7 @@ impl IntoOptSliceRange for usize {
             start: Bound::Included(self),
             end: Bound::Excluded(self + 1),
             step: 1,
-            was_none: false
+            was_none: false,
         })
     }
 }

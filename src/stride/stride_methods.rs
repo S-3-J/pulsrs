@@ -27,7 +27,7 @@ impl Stride {
     }
 
     pub fn from_vec(strides: Vec<isize>) -> Self {
-        Self {strides}
+        Self { strides }
     }
 
     pub fn rank(&self) -> usize {
@@ -55,13 +55,12 @@ impl Stride {
         }
 
         let mut final_offset: isize = 0;
-                
+
         for (i, idx) in indices.iter().enumerate() {
             final_offset += self.get(i).unwrap() * (*idx) as isize;
         }
 
         Ok(final_offset)
-
     }
 }
 

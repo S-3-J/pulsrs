@@ -1,22 +1,21 @@
-
 use std::fmt::{Display, Write};
 
 use crate::dtype::Element;
 use crate::tensor::Tensor;
 
-impl<T> Display for Tensor<T> 
-where 
-    T: Copy + Display + Element
+impl<T> Display for Tensor<T>
+where
+    T: Copy + Display + Element,
 {
-    
-    fn fmt(
-        &self, 
-        f: &mut std::fmt::Formatter<'_>
-    ) -> std::fmt::Result 
-    {
-        fn recursive_printer<T>(t: &Tensor<T>, depth: usize, index: &mut Vec<usize>, dims: &[usize]) -> String
-        where 
-            T: Copy + Display + Element
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fn recursive_printer<T>(
+            t: &Tensor<T>,
+            depth: usize,
+            index: &mut Vec<usize>,
+            dims: &[usize],
+        ) -> String
+        where
+            T: Copy + Display + Element,
         {
             if depth >= dims.len() {
                 return "".to_string();
@@ -26,37 +25,28 @@ where
 
             for i in 0..dims[depth] {
                 index[depth] = i;
-                let s = recursive_printer(t, depth+1, index, dims);
+                let s = recursive_printer(t, depth + 1, index, dims);
 
                 if s.is_empty() {
                     let mut a = t.get(index).unwrap().to_string();
                     if i < dims[depth] - 1 {
                         a.push_str(", ");
                     }
-                    let _ = write!(
-                        &mut master_string,
-                        "{}",
-                        a
-                    );
+                    let _ = write!(&mut master_string, "{}", a);
                 } else {
-                    let _ = write!(
-                        &mut master_string,
-                        "{}",
-                        s
-                    );
+                    let _ = write!(&mut master_string, "{}", s);
                 }
             }
             let space = vec!["    "; depth].join("");
 
-            master_string = "\n".to_string() + &space + "[" + &master_string + {
-                if depth + 1 != dims.len() {
-                    &space
-                } else {
-                    ""
-                }
-            } + "]\n" ;
+            master_string = "\n".to_string()
+                + &space
+                + "["
+                + &master_string
+                + { if depth + 1 != dims.len() { &space } else { "" } }
+                + "]\n";
 
-            master_string 
+            master_string
         }
 
         if self.is_scalar() {
@@ -81,6 +71,5 @@ where
             )?;
             Ok(())
         }
-
     }
 }

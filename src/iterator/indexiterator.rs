@@ -1,12 +1,9 @@
-
 use super::{IndexCursor, IndexIterator};
 use crate::cursor::Cursor;
 
 impl IndexIterator {
     pub fn new(cursor: IndexCursor) -> Self {
-        Self {
-            cursor,
-        }
+        Self { cursor }
     }
 }
 
@@ -23,4 +20,3 @@ impl Iterator for IndexIterator {
         }
     }
 }
-

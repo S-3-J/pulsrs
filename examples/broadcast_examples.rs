@@ -5,29 +5,20 @@ fn main() {
     // 1. Equal shapes
     // ============================================================
 
-    let a = Tensor::<i8>::arange(1, 6, 1)
-        .reshape(vec![2, 3])
-        .unwrap();
+    let a = Tensor::<i8>::arange(1, 6, 1).reshape(vec![2, 3]).unwrap();
 
-    let b = Tensor::<i8>::arange(1, 6, 1)
-        .reshape(vec![2, 3])
-        .unwrap();
+    let b = Tensor::<i8>::arange(1, 6, 1).reshape(vec![2, 3]).unwrap();
 
     println!("TEST 1: [2, 3] + [2, 3]");
     println!("{:?}\n", a.is_broadcastible_for(b.shape().dims()));
-
 
     // ============================================================
     // 2. [3] -> [2, 3]
     // ============================================================
 
-    let a = Tensor::<i8>::arange(1, 3, 1)
-        .reshape(vec![3])
-        .unwrap();
+    let a = Tensor::<i8>::arange(1, 3, 1).reshape(vec![3]).unwrap();
 
-    let b = Tensor::<i8>::arange(1, 6, 1)
-        .reshape(vec![2, 3])
-        .unwrap();
+    let b = Tensor::<i8>::arange(1, 6, 1).reshape(vec![2, 3]).unwrap();
 
     println!("TEST 2: [3] + [2, 3]");
     println!("{:?}", a.is_broadcastible_for(b.shape().dims()));
@@ -39,18 +30,13 @@ fn main() {
     println!("Shape: {:?}", c.shape().dims());
     println!("Stride: {:?}\n", c.strides());
 
-
     // ============================================================
     // 3. [1, 3] -> [2, 3]
     // ============================================================
 
-    let a = Tensor::<i8>::arange(1, 3, 1)
-        .reshape(vec![1, 3])
-        .unwrap();
+    let a = Tensor::<i8>::arange(1, 3, 1).reshape(vec![1, 3]).unwrap();
 
-    let b = Tensor::<i8>::arange(1, 6, 1)
-        .reshape(vec![2, 3])
-        .unwrap();
+    let b = Tensor::<i8>::arange(1, 6, 1).reshape(vec![2, 3]).unwrap();
 
     println!("TEST 3: [1, 3] + [2, 3]");
     println!("{:?}", a.is_broadcastible_for(b.shape().dims()));
@@ -59,7 +45,6 @@ fn main() {
 
     println!("Shape: {:?}", c.shape().dims());
     println!("Stride: {:?}\n", c.strides());
-
 
     // ============================================================
     // 4. Middle-dimension broadcasting
@@ -83,7 +68,6 @@ fn main() {
     println!("Shape: {:?}", c.shape().dims());
     println!("Stride: {:?}\n", c.strides());
 
-
     // ============================================================
     // 5. New leading dimension
     // [5, 2, 3] + [2, 3]
@@ -93,9 +77,7 @@ fn main() {
         .reshape(vec![5, 2, 3])
         .unwrap();
 
-    let b = Tensor::<i8>::arange(1, 6, 1)
-        .reshape(vec![2, 3])
-        .unwrap();
+    let b = Tensor::<i8>::arange(1, 6, 1).reshape(vec![2, 3]).unwrap();
 
     println!("TEST 5: [5, 2, 3] + [2, 3]");
     println!("{:?}", a.is_broadcastible_for(b.shape().dims()));
@@ -103,22 +85,16 @@ fn main() {
     println!("Reverse:");
     println!("{:?}\n", b.is_broadcastible_for(a.shape().dims()));
 
-
     // ============================================================
     // 6. Incompatible shapes
     // ============================================================
 
-    let a = Tensor::<i8>::arange(1, 6, 1)
-        .reshape(vec![2, 3])
-        .unwrap();
+    let a = Tensor::<i8>::arange(1, 6, 1).reshape(vec![2, 3]).unwrap();
 
-    let b = Tensor::<i8>::arange(1, 8, 1)
-        .reshape(vec![2, 4])
-        .unwrap();
+    let b = Tensor::<i8>::arange(1, 8, 1).reshape(vec![2, 4]).unwrap();
 
     println!("TEST 6: [2, 3] + [2, 4]");
     println!("{:?}\n", a.is_broadcastible_for(b.shape().dims()));
-
 
     // ============================================================
     // 7. Your original complex case
@@ -134,12 +110,7 @@ fn main() {
         .unwrap();
 
     let sliced = t2
-        .slice(vec![
-            (..).iosr(),
-            None,
-            (..).iosr(),
-            (..).iosr(),
-        ])
+        .slice(vec![(..).iosr(), None, (..).iosr(), (..).iosr()])
         .unwrap();
 
     println!("TEST 7: Complex broadcast");
